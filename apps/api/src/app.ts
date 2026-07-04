@@ -6,6 +6,7 @@ import { type AuthVariables, loadAuthSession } from "./modules/auth/middleware";
 import { dashboardRouter } from "./modules/dashboard/router";
 import { subscriptionsRouter } from "./modules/subscriptions/router";
 import { usersRouter } from "./modules/users/router";
+import { aiRouter } from "./modules/ai/router";
 
 export const app = new Hono<{ Variables: AuthVariables }>()
   .use(
@@ -36,6 +37,7 @@ export const app = new Hono<{ Variables: AuthVariables }>()
   })
   .route("/subscriptions", subscriptionsRouter)
   .route("/dashboard", dashboardRouter)
-  .route("/users", usersRouter);
+  .route("/users", usersRouter)
+  .route("/ai", aiRouter);
 
 export type AppType = typeof app;

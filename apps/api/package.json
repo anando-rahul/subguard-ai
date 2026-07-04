@@ -16,6 +16,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.7",
     "@better-auth/prisma-adapter": "^1.6.20",
     "@hono/node-server": "^2.0.5",
     "@hono/zod-validator": "^0.8.0",
@@ -24,8 +25,10 @@
     "@repo/config": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/telemetry": "workspace:*",
+    "ai": "^7.0.15",
     "better-auth": "^1.6.20",
     "hono": "^4.12.26",
+    "openai": "^6.45.0",
     "pg": "^8.22.0",
     "zod": "^4.4.3"
   },

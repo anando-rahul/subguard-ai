@@ -14,8 +14,8 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const { t } = useTranslation();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("super@gmail.com");
+  const [password, setPassword] = useState("secret123");
   const loginMutation = useLoginMutation();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {

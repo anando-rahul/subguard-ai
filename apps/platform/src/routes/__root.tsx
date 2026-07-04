@@ -4,6 +4,7 @@ import { toast } from "@repo/ui/components/sonner";
 import type { QueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 import { createRootRouteWithContext, Link, Outlet } from "@tanstack/react-router";
+import { Sparkles } from "lucide-react";
 import { BrandLogo } from "../components/brand";
 import { meQueryOptions, useLogoutMutation } from "../modules/auth/hooks/use-auth";
 
@@ -45,6 +46,12 @@ function RootLayout() {
                 <Button asChild variant="ghost" size="sm">
                   <Link to="/subscriptions" search={{ sort: "nextBillingDateAsc" }}>
                     {t("nav.subscriptions")}
+                  </Link>
+                </Button>
+                <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex text-primary">
+                  <Link to="/ai-review">
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    AI Assistant
                   </Link>
                 </Button>
                 <span className="hidden max-w-xs truncate text-sm text-muted-foreground lg:block">

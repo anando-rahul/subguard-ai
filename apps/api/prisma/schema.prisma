@@ -33,6 +33,13 @@ enum SubscriptionStatus {
   CANCELLED
 }
 
+enum LogStatus {
+  PENDING
+  SENT
+  SUCCESS
+  FAILED
+}
+
 enum UsageFrequency {
   OFTEN
   SOMETIMES
@@ -55,6 +62,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   subscriptions Subscription[]
+  aiReviewLogs  AIReviewLog[]
 }
 
 model Session {
@@ -120,3 +128,17 @@ model Subscription {
   @@index([userId, nextBillingDate])
   @@index([userId, category])
 }
+
+model AIReviewLog {
+  id            String    @id @default(cuid())
+  userId        String
+  inputSummary  Json
+  outputSummary Json?
+  status        LogStatus
+  errorMessage  String?
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
