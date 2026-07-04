@@ -92,3 +92,17 @@ export async function updateSubscriptionStatus({
 
   return (await response.json()) as Subscription;
 }
+
+export async function renewSubscription(id: string) {
+  const response = await apiClient.subscriptions[":id"].renew.$patch({ param: { id } });
+  await assertOk(response, "Failed to renew subscription.");
+
+  return (await response.json()) as Subscription;
+}
+
+export async function cancelSubscription(id: string) {
+  const response = await apiClient.subscriptions[":id"].cancel.$patch({ param: { id } });
+  await assertOk(response, "Failed to cancel subscription.");
+
+  return (await response.json()) as Subscription;
+}

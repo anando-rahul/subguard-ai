@@ -11,10 +11,12 @@ import {
   subscriptionUpdateSchema,
 } from "./schema";
 import {
+  cancelSubscription,
   createSubscription,
   deleteSubscription,
   getSubscription,
   listSubscriptions,
+  renewSubscription,
   updateSubscription,
   updateSubscriptionCandidate,
   updateSubscriptionStatus,
@@ -76,6 +78,20 @@ export const subscriptionsRouter = new Hono<{ Variables: AuthVariables }>()
 
     const deleted = await deleteSubscription(user.id, c.req.valid("param").id);
     return deleted ? c.body(null, 204) : notFound(c);
+  })
+  .patch("/:id/renew", zValidator("param", subscriptionIdSchema), async (c) => {
+    const user = requireUser(c);
+    if (!user) return unauthorized(c);
+
+    const subscription = await renewSubscription(user.id, c.req.valid("param").id);
+    return subscription ? c.json(subscription, 200) : notFound(c);
+  })
+  .patch("/:id/cancel", zValidator("param", subscriptionIdSchema), async (c) => {
+    const user = requireUser(c);
+    if (!user) return unauthorized(c);
+
+    const subscription = await cancelSubscription(user.id, c.req.valid("param").id);
+    return subscription ? c.json(subscription, 200) : notFound(c);
   })
   .patch(
     "/:id/candidate",

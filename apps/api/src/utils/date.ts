@@ -42,6 +42,17 @@ export function formatDateOnly(value: Date) {
   return value.toISOString().slice(0, 10);
 }
 
+export function addMonthsToDateOnly(value: Date, months: number) {
+  const targetMonth = value.getUTCMonth() + months;
+  const targetYear = value.getUTCFullYear() + Math.floor(targetMonth / 12);
+  const normalizedMonth = ((targetMonth % 12) + 12) % 12;
+  const lastDayOfTargetMonth = new Date(Date.UTC(targetYear, normalizedMonth + 1, 0)).getUTCDate();
+
+  return new Date(
+    Date.UTC(targetYear, normalizedMonth, Math.min(value.getUTCDate(), lastDayOfTargetMonth)),
+  );
+}
+
 export function getJakartaDateOnly(value = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     day: "2-digit",

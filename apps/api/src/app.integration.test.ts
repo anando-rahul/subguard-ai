@@ -1,7 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { app } from "./app";
-import { formatDateOnly, getJakartaDateOnly, parseDateOnly } from "./utils/date";
+import {
+  addMonthsToDateOnly,
+  formatDateOnly,
+  getJakartaDateOnly,
+  parseDateOnly,
+} from "./utils/date";
 import { prisma } from "./utils/prisma";
 
 const runDatabaseTests = process.env.RUN_DATABASE_INTEGRATION_TESTS === "1";
@@ -130,6 +135,7 @@ describe.skipIf(!runDatabaseTests)("phase 2 database integration", () => {
     }
 
     const monthlyId = (created[0] as { id: string }).id;
+    const unaffectedId = (created[1] as { id: string }).id;
     const summary = await authenticatedRequest("/dashboard/summary", userACookie);
     await expect(summary.json()).resolves.toEqual({
       activeSubscriptionCount: 1,
@@ -163,6 +169,12 @@ describe.skipIf(!runDatabaseTests)("phase 2 database integration", () => {
         headers: { "content-type": "application/json" },
         method: "PATCH",
       }),
+      authenticatedRequest(`/subscriptions/${monthlyId}/renew`, userBCookie, {
+        method: "PATCH",
+      }),
+      authenticatedRequest(`/subscriptions/${monthlyId}/cancel`, userBCookie, {
+        method: "PATCH",
+      }),
       authenticatedRequest(`/subscriptions/${monthlyId}`, userBCookie, { method: "DELETE" }),
     ]) {
       expect((await request).status).toBe(404);
@@ -186,6 +198,40 @@ describe.skipIf(!runDatabaseTests)("phase 2 database integration", () => {
       },
     );
     expect(candidate.status).toBe(200);
+
+    const unaffectedBefore = await authenticatedRequest(
+      `/subscriptions/${unaffectedId}`,
+      userACookie,
+    );
+    const unaffectedSubscription = (await unaffectedBefore.json()) as {
+      nextBillingDate: string;
+      status: string;
+    };
+
+    const cancelled = await authenticatedRequest(
+      `/subscriptions/${monthlyId}/cancel`,
+      userACookie,
+      {
+        method: "PATCH",
+      },
+    );
+    expect(cancelled.status).toBe(200);
+    await expect(cancelled.json()).resolves.toMatchObject({ status: "CANCELLED" });
+
+    const renewed = await authenticatedRequest(`/subscriptions/${monthlyId}/renew`, userACookie, {
+      method: "PATCH",
+    });
+    expect(renewed.status).toBe(200);
+    await expect(renewed.json()).resolves.toMatchObject({
+      nextBillingDate: formatDateOnly(addMonthsToDateOnly(parseDateOnly(today), 1)),
+      status: "ACTIVE",
+    });
+
+    const unaffectedAfter = await authenticatedRequest(
+      `/subscriptions/${unaffectedId}`,
+      userACookie,
+    );
+    await expect(unaffectedAfter.json()).resolves.toMatchObject(unaffectedSubscription);
 
     const updatedSummary = await authenticatedRequest("/dashboard/summary", userACookie);
     await expect(updatedSummary.json()).resolves.toMatchObject({

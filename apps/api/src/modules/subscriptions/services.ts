@@ -1,4 +1,4 @@
-import { formatDateOnly, parseDateOnly } from "../../utils/date";
+import { addMonthsToDateOnly, formatDateOnly, parseDateOnly } from "../../utils/date";
 import { Prisma, prisma, type Subscription } from "../../utils/prisma";
 import type { SubscriptionInput, SubscriptionsQuery, SubscriptionUpdateInput } from "./schema";
 import type { SubscriptionResponse } from "./types";
@@ -126,6 +126,33 @@ export async function updateSubscriptionStatus(
   status: Subscription["status"],
 ) {
   return updateSubscription(userId, id, { status });
+}
+
+export async function cancelSubscription(userId: string, id: string) {
+  return updateSubscription(userId, id, { status: "CANCELLED" });
+}
+
+export async function renewSubscription(userId: string, id: string) {
+  const current = await prisma.subscription.findFirst({ where: { id, userId } });
+  if (!current) return null;
+
+  try {
+    const subscription = await prisma.subscription.update({
+      data: {
+        nextBillingDate: addMonthsToDateOnly(
+          current.nextBillingDate,
+          current.billingCycle === "MONTHLY" ? 1 : 12,
+        ),
+        status: "ACTIVE",
+      },
+      where: { id, userId },
+    });
+
+    return serializeSubscription(subscription);
+  } catch (error) {
+    if (isMissingRecordError(error)) return null;
+    throw error;
+  }
 }
 
 export async function deleteSubscription(userId: string, id: string) {
