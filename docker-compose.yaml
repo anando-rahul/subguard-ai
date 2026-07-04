@@ -11,13 +11,13 @@ services:
     container_name: subguard-ai-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: subguardai
+      POSTGRES_PASSWORD: sub1234
       POSTGRES_DB: subguard_ai
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d subguard_ai"]
+      test: ["CMD-SHELL", "pg_isready -U subguardai -d subguard_ai"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -44,7 +44,7 @@ services:
       BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:-dev-change-me}"
       BETTER_AUTH_URL: "${BETTER_AUTH_URL:-http://localhost:8000}"
       CLIENT_ORIGINS: "${CLIENT_ORIGINS:-http://localhost:3000,http://localhost:4000}"
-      DATABASE_URL: "${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/subguard_ai?schema=public}"
+      DATABASE_URL: "${DOCKER_DATABASE_URL:-postgresql://subguardai:sub1234@postgres:5432/subguard_ai?schema=public}"
       ENABLE_TELEMETRY: "${ENABLE_TELEMETRY:-false}"
       LOG_LEVEL: "${LOG_LEVEL:-info}"
       REDIS_URL: "${DOCKER_REDIS_URL:-redis://redis:6379}"
@@ -103,7 +103,7 @@ services:
     container_name: subguard-ai-worker
     restart: unless-stopped
     environment:
-      DATABASE_URL: "${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/subguard_ai?schema=public}"
+      DATABASE_URL: "${DOCKER_DATABASE_URL:-postgresql://subguardai:sub1234@postgres:5432/subguard_ai?schema=public}"
       ENABLE_TELEMETRY: "${ENABLE_TELEMETRY:-false}"
       LOG_LEVEL: "${LOG_LEVEL:-info}"
       REDIS_URL: "${DOCKER_REDIS_URL:-redis://redis:6379}"

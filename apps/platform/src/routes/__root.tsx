@@ -1,8 +1,11 @@
-import type { QueryClient } from "@tanstack/react-query";
 import { LanguageSwitcher, useTranslation } from "@repo/i18n";
 import { Button } from "@repo/ui/components/button";
+import { toast } from "@repo/ui/components/sonner";
+import type { QueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createRootRouteWithContext, Link, Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+import { BrandLogo } from "../components/brand";
+import { meQueryOptions, useLogoutMutation } from "../modules/auth/hooks/use-auth";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   component: RootLayout,
@@ -10,29 +13,75 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootLayout() {
   const { t } = useTranslation();
+  const user = useQuery(meQueryOptions);
+  const logoutMutation = useLogoutMutation();
+
+  function handleLogout() {
+    logoutMutation.mutate(undefined, {
+      onError: (error) => {
+        const message = error instanceof Error ? error.message : t("dashboard.logoutFallbackError");
+        toast.error(message);
+      },
+    });
+  }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <Link to="/" className="font-semibold">
-            {t("nav.brand")}
-          </Link>
-          <nav className="flex items-center gap-3">
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/">{t("nav.dashboard")}</Link>
-            </Button>
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/login">{t("nav.login")}</Link>
-            </Button>
-            <LanguageSwitcher />
+    <div className="flex min-h-dvh flex-col bg-background text-foreground">
+      <a
+        href="#main-content"
+        className="sr-only fixed left-4 top-4 z-50 rounded-md bg-primary px-4 py-2 text-primary-foreground focus:not-sr-only"
+      >
+        {t("accessibility.skipToContent")}
+      </a>
+      <header className="reference-header">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
+          <BrandLogo />
+          <nav aria-label={t("nav.primaryLabel")} className="flex items-center gap-1 sm:gap-2">
+            {user.data ? (
+              <>
+                <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+                  <Link to="/dashboard">{t("nav.dashboard")}</Link>
+                </Button>
+                <Button asChild variant="ghost" size="sm">
+                  <Link to="/subscriptions" search={{ sort: "nextBillingDateAsc" }}>
+                    {t("nav.subscriptions")}
+                  </Link>
+                </Button>
+                <span className="hidden max-w-xs truncate text-sm text-muted-foreground lg:block">
+                  {user.data.name || user.data.email}
+                </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={logoutMutation.isPending}
+                  onClick={handleLogout}
+                >
+                  {logoutMutation.isPending ? t("dashboard.logoutPending") : t("dashboard.logout")}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {t("nav.login")}
+                </Link>
+                <Button asChild size="sm" className="hidden sm:inline-flex">
+                  <Link to="/register">{t("nav.register")}</Link>
+                </Button>
+              </>
+            )}
+            <div className="hidden xl:block">
+              <LanguageSwitcher />
+            </div>
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main id="main-content" className="flex flex-1 flex-col">
         <Outlet />
       </main>
-      {import.meta.env.DEV ? <TanStackRouterDevtools position="bottom-right" /> : null}
     </div>
   );
 }

@@ -15,9 +15,9 @@ export function useLoginMutation() {
 
   return useMutation({
     mutationFn: login,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: authQueryKey });
-      await navigate({ to: "/" });
+    onSuccess: async (user) => {
+      queryClient.setQueryData(meQueryOptions.queryKey, user);
+      await navigate({ to: "/dashboard" });
     },
   });
 }
@@ -28,9 +28,9 @@ export function useRegisterMutation() {
 
   return useMutation({
     mutationFn: register,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: authQueryKey });
-      await navigate({ to: "/" });
+    onSuccess: async (user) => {
+      queryClient.setQueryData(meQueryOptions.queryKey, user);
+      await navigate({ to: "/dashboard" });
     },
   });
 }
@@ -43,7 +43,7 @@ export function useLogoutMutation() {
     mutationFn: logout,
     onSuccess: async () => {
       queryClient.removeQueries({ queryKey: authQueryKey });
-      await navigate({ to: "/login" });
+      await navigate({ to: "/" });
     },
   });
 }

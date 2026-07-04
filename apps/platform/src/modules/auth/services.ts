@@ -1,9 +1,7 @@
-import { createApiClient } from "@repo/api-client";
 import { createAuthClient } from "better-auth/react";
+import { apiBaseUrl, apiClient } from "../../lib/api";
 import type { AuthUser, LoginInput, RegisterInput } from "./types";
 
-const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
-const apiClient = createApiClient(apiBaseUrl);
 const authClient = createAuthClient({
   baseURL: apiBaseUrl,
 });

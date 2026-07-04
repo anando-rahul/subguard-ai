@@ -2,7 +2,6 @@ import type { QueryClient } from "@tanstack/react-query";
 import { LanguageSwitcher, useTranslation } from "@repo/i18n";
 import { Button } from "@repo/ui/components/button";
 import { createRootRouteWithContext, Link, Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   component: RootLayout,
@@ -32,7 +31,6 @@ function RootLayout() {
       <main className="mx-auto max-w-6xl px-6 py-10">
         <Outlet />
       </main>
-      {import.meta.env.DEV ? <TanStackRouterDevtools position="bottom-right" /> : null}
     </div>
   );
 }

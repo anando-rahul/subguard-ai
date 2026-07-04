@@ -7,7 +7,7 @@ export type LogLevel = "fatal" | "error" | "warn" | "info" | "debug" | "trace" |
 
 const defaultClientOrigins = "http://localhost:3000,http://localhost:4000";
 const defaultDatabaseUrl =
-  "postgresql://postgres:postgres@localhost:15432/subguard_ai?schema=public";
+  "postgresql://subguardai:sub1234@localhost:5432/subguard_ai?schema=public";
 const defaultBetterAuthUrl = "http://localhost:8000";
 
 const runtimeEnvSchema = z.enum(["development", "test", "production"]).default("development");

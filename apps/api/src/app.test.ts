@@ -11,4 +11,16 @@ describe("api app", () => {
     });
     expect(response.status).toBe(200);
   });
+
+  it.each([
+    "/subscriptions",
+    "/subscriptions/subscription-id",
+    "/dashboard/summary",
+    "/dashboard/upcoming-billing",
+  ])("protects %s", async (path) => {
+    const response = await app.request(path);
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({ error: "unauthorized" });
+  });
 });
