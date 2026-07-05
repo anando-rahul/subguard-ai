@@ -1,24 +1,26 @@
 import { prisma } from "../apps/api/src/utils/prisma";
 
 async function main() {
-  const user = await prisma.user.findUnique({
-    where: { email: "super@gmail.com" },
-  });
-
-  if (!user) {
-    console.error("Super user not found");
-    return;
-  }
-
-  // Clear existing subscriptions for a clean demo state
-  await prisma.subscription.deleteMany({
-    where: { userId: user.id },
-  });
-
+  const emails = ["super@gmail.com", "rahul@gmail.com"];
   const now = new Date();
 
-  await prisma.subscription.createMany({
-    data: [
+  for (const email of emails) {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      console.warn(`User ${email} not found, skipping...`);
+      continue;
+    }
+
+    // Clear existing subscriptions for a clean demo state
+    await prisma.subscription.deleteMany({
+      where: { userId: user.id },
+    });
+
+    await prisma.subscription.createMany({
+      data: [
       {
         userId: user.id,
         name: "Netflix Premium",
@@ -151,9 +153,10 @@ async function main() {
         nextBillingDate: new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000),
       },
     ],
-  });
+    });
 
-  console.log("Database seeded successfully with 10 realistic demo subscriptions!");
+    console.log(`Database seeded successfully for ${email}!`);
+  }
 }
 
 main()
