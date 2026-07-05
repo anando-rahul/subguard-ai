@@ -11,7 +11,7 @@ const openrouter = createOpenAI({
 const aiModel = process.env.OPENROUTER_MODEL || "google/gemma-4-31b-it:free";
 
 const recommendationSchema = z.object({
-  overallSummary: z.string().describe("Ringkasan analisis keseluruhan"),
+  overallSummary: z.string().describe("Overall analysis summary"),
   recommendations: z.array(
     z.object({
       subscriptionId: z.string(),
@@ -35,7 +35,7 @@ export async function reviewSubscriptions(userId: string) {
   if (subscriptions.length < 3) {
     return {
       success: false,
-      message: "Tambahkan minimal 3 langganan untuk memulai analisis AI.",
+      message: "Please add at least 3 subscriptions to start AI analysis.",
     };
   }
 
@@ -50,6 +50,9 @@ export async function reviewSubscriptions(userId: string) {
   const today = new Date();
   const next7Days = new Date(today);
   next7Days.setDate(next7Days.getDate() + 7);
+
+  const formatEnum = (str: string) => 
+    str.replace(/_/g, ' ').replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 
   // 2. Kalkulasi Score Internal Backend
   const scoredSubscriptions = subscriptions.map((sub) => {
@@ -77,8 +80,9 @@ export async function reviewSubscriptions(userId: string) {
       name: sub.name,
       price: sub.price.toNumber(),
       billingCycle: sub.billingCycle,
-      category: sub.category,
-      usageFrequency: sub.usageFrequency,
+      category: formatEnum(sub.category),
+      usageFrequency: formatEnum(sub.usageFrequency),
+      billingSource: formatEnum(sub.billingSource),
       score,
     };
   });
@@ -88,11 +92,11 @@ export async function reviewSubscriptions(userId: string) {
     const { object } = await generateObject({
       model: openrouter(aiModel),
       schema: recommendationSchema,
-      prompt: `Kamu adalah asisten pengatur keuangan. Evaluasi daftar langganan berikut dan berikan rekomendasi pembatalan atau optimasi berdasarkan data yang diberikan.\n\nDaftar langganan:\n${JSON.stringify(
+      prompt: `You are a financial assistant. Evaluate the following list of subscriptions and provide recommendations for cancellation or optimization based on the given data. Ensure the tone is natural, friendly, and easy to read for the end user (avoid mentioning rigid raw data labels like "Category: Work Tools", but rather weave them into readable sentences). ALL RESPONSES MUST BE IN ENGLISH.\n\nSubscriptions list:\n${JSON.stringify(
         scoredSubscriptions,
         null,
         2
-      )}\n\nBerikan \`overallSummary\` dan list \`recommendations\` sesuai schema. Untuk rekomendasi, sertakan \`subscriptionId\`, \`name\`, tingkat \`urgency\` ("LOW", "MEDIUM", "HIGH"), \`reason\` (berdasarkan frekuensi pakai/biaya), dan \`suggestedAction\`.`,
+      )}\n\nProvide an \`overallSummary\` and a list of \`recommendations\` according to the schema. For each recommendation, include \`subscriptionId\`, \`name\`, \`urgency\` level ("LOW", "MEDIUM", "HIGH"), \`reason\` (based on usage frequency/cost), and \`suggestedAction\` (including specific steps on how to cancel based on the \`billingSource\`). YOU MUST OUTPUT VALID JSON.`,
     });
 
     // Save history to AIReviewLog
@@ -122,7 +126,51 @@ export async function reviewSubscriptions(userId: string) {
 
     return {
       success: false,
-      message: "Gagal memproses analisis AI.",
+      message: "Failed to process AI analysis.",
     };
+  }
+}
+
+export async function getAIReviewHistory(userId: string) {
+  try {
+    const history = await prisma.aIReviewLog.findMany({
+      where: { userId, status: "SUCCESS" },
+      orderBy: { createdAt: "desc" },
+    });
+    return { success: true, data: history };
+  } catch (error) {
+    console.error("Failed to fetch AI review history:", error);
+    return { success: false, message: "Failed to fetch history." };
+  }
+}
+
+export async function deleteAllAIReviewHistory(userId: string) {
+  try {
+    await prisma.aIReviewLog.deleteMany({
+      where: { userId },
+    });
+    return { success: true, message: "History cleared successfully." };
+  } catch (error) {
+    console.error("Failed to clear AI review history:", error);
+    return { success: false, message: "Failed to clear history." };
+  }
+}
+
+export async function deleteAIReviewHistoryById(userId: string, id: string) {
+  try {
+    const log = await prisma.aIReviewLog.findUnique({
+      where: { id },
+    });
+    if (!log || log.userId !== userId) {
+      return { success: false, message: "Review log not found or unauthorized." };
+    }
+
+    await prisma.aIReviewLog.delete({
+      where: { id },
+    });
+    return { success: true, message: "Review log deleted successfully." };
+  } catch (error) {
+    console.error("Failed to delete AI review log:", error);
+    return { success: false, message: "Failed to delete log." };
   }
 }

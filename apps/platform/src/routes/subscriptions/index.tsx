@@ -23,6 +23,13 @@ import {
   RefreshCwIcon,
   Trash2Icon,
 } from "@repo/ui/components/icons";
+import { CalendarIcon, CreditCard, LinkIcon, MoreHorizontal, Eye } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@repo/ui/components/dropdown-menu";
 import { NativeSelect, NativeSelectOption } from "@repo/ui/components/native-select";
 import { Skeleton } from "@repo/ui/components/skeleton";
 import { toast } from "@repo/ui/components/sonner";
@@ -115,13 +122,13 @@ function SubscriptionsPage() {
         </Button>
       </header>
 
-      <Card className="mt-8">
-        <CardContent className="grid gap-4 pt-6 md:grid-cols-3">
-          <label htmlFor="subscription-status-filter" className="grid gap-2 text-sm font-medium">
+      <div className="mt-8 rounded-xl border bg-muted/20 p-4 shadow-sm">
+        <div className="grid gap-4 md:grid-cols-3">
+          <label htmlFor="subscription-status-filter" className="grid gap-2 text-sm font-medium text-muted-foreground">
             {t("subscriptions.filters.status")}
             <NativeSelect
               id="subscription-status-filter"
-              className="w-full"
+              className="w-full bg-background"
               value={search.status ?? "ALL"}
               onChange={(event) =>
                 updateSearch({
@@ -143,11 +150,11 @@ function SubscriptionsPage() {
             </NativeSelect>
           </label>
 
-          <label htmlFor="subscription-category-filter" className="grid gap-2 text-sm font-medium">
+          <label htmlFor="subscription-category-filter" className="grid gap-2 text-sm font-medium text-muted-foreground">
             {t("subscriptions.filters.category")}
             <NativeSelect
               id="subscription-category-filter"
-              className="w-full"
+              className="w-full bg-background"
               value={search.category ?? "ALL"}
               onChange={(event) =>
                 updateSearch({
@@ -169,11 +176,11 @@ function SubscriptionsPage() {
             </NativeSelect>
           </label>
 
-          <label htmlFor="subscription-sort" className="grid gap-2 text-sm font-medium">
+          <label htmlFor="subscription-sort" className="grid gap-2 text-sm font-medium text-muted-foreground">
             {t("subscriptions.filters.sort")}
             <NativeSelect
               id="subscription-sort"
-              className="w-full"
+              className="w-full bg-background"
               value={search.sort}
               onChange={(event) => updateSearch({ sort: event.target.value as SubscriptionSort })}
             >
@@ -185,8 +192,8 @@ function SubscriptionsPage() {
               </NativeSelectOption>
             </NativeSelect>
           </label>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {subscriptions.isPending ? <SubscriptionListSkeleton /> : null}
 
@@ -208,12 +215,15 @@ function SubscriptionsPage() {
       ) : null}
 
       {subscriptions.data?.items.length === 0 ? (
-        <Empty className="mt-8 rounded-xl border py-16">
+        <Empty className="mt-8 rounded-xl border bg-card py-20 shadow-sm">
           <EmptyHeader>
-            <EmptyTitle>
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <CreditCard className="h-8 w-8 text-primary" />
+            </div>
+            <EmptyTitle className="text-xl font-bold">
               {t(isFiltered ? "subscriptions.empty.filteredTitle" : "subscriptions.empty.title")}
             </EmptyTitle>
-            <EmptyDescription>
+            <EmptyDescription className="max-w-md mx-auto">
               {t(
                 isFiltered
                   ? "subscriptions.empty.filteredDescription"
@@ -221,19 +231,21 @@ function SubscriptionsPage() {
               )}
             </EmptyDescription>
           </EmptyHeader>
-          {isFiltered ? (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => void navigate({ search: { sort: "nextBillingDateAsc" } })}
-            >
-              {t("subscriptions.actions.clearFilters")}
-            </Button>
-          ) : (
-            <Button asChild>
-              <Link to="/subscriptions/new">{t("subscriptions.actions.addFirst")}</Link>
-            </Button>
-          )}
+          <div className="mt-4 flex justify-center">
+            {isFiltered ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void navigate({ search: { sort: "nextBillingDateAsc" } })}
+              >
+                {t("subscriptions.actions.clearFilters")}
+              </Button>
+            ) : (
+              <Button asChild size="lg">
+                <Link to="/subscriptions/new">{t("subscriptions.actions.addFirst")}</Link>
+              </Button>
+            )}
+          </div>
         </Empty>
       ) : null}
 
@@ -242,77 +254,87 @@ function SubscriptionsPage() {
           <div className="mt-8 hidden overflow-x-auto rounded-xl border bg-card lg:block">
             <Table className="min-w-[1480px] table-fixed">
               <colgroup>
-                <col className="w-[220px]" />
+                <col className="w-[240px]" />
                 <col className="w-[160px]" />
                 <col className="w-[180px]" />
-                <col className="w-[170px]" />
-                <col className="w-[200px]" />
-                <col className="w-[130px]" />
-                <col className="w-[160px]" />
-                <col className="w-[260px]" />
+                <col className="w-[220px]" />
+                <col className="w-[180px]" />
+                <col className="w-[140px]" />
               </colgroup>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="px-4">{t("subscriptions.fields.name")}</TableHead>
-                  <TableHead className="px-4">{t("subscriptions.fields.price")}</TableHead>
-                  <TableHead className="px-4">
+                <TableRow className="border-b bg-muted/30 hover:bg-muted/30">
+                  <TableHead className="px-6 py-4">{t("subscriptions.fields.name")}</TableHead>
+                  <TableHead className="px-6 py-4">{t("subscriptions.fields.price")}</TableHead>
+                  <TableHead className="px-6 py-4">
                     {t("subscriptions.fields.nextBillingDate")}
                   </TableHead>
-                  <TableHead className="px-4">{t("subscriptions.fields.paymentMethod")}</TableHead>
-                  <TableHead className="px-4">{t("subscriptions.fields.billingSource")}</TableHead>
-                  <TableHead className="px-4">{t("subscriptions.fields.status")}</TableHead>
-                  <TableHead className="px-4">{t("subscriptions.fields.usageFrequency")}</TableHead>
-                  <TableHead className="px-4 text-center">
+                  <TableHead className="px-6 py-4">{t("subscriptions.fields.paymentMethod")}</TableHead>
+                  <TableHead className="px-6 py-4">{t("subscriptions.fields.status")}</TableHead>
+                  <TableHead className="px-6 py-4 text-center">
                     {t("subscriptions.fields.actions")}
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {subscriptions.data.items.map((subscription) => (
-                  <TableRow key={subscription.id} data-subscription-id={subscription.id}>
-                    <TableCell className="px-4 py-4 align-top">
-                      <div className="grid min-w-0 gap-1">
-                        <span className="truncate font-medium" title={subscription.name}>
+                  <TableRow key={subscription.id} data-subscription-id={subscription.id} className="hover:bg-muted/40 transition-colors">
+                    <TableCell className="px-6 py-5 align-top">
+                      <div className="grid gap-1.5">
+                        <Link to="/subscriptions/$subscriptionId" params={{ subscriptionId: subscription.id }} className="font-semibold text-base break-words hover:underline decoration-primary/50 underline-offset-4 transition-all" title={subscription.name}>
                           {subscription.name}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {t(`subscriptions.categories.${subscription.category}`)}
-                        </span>
+                        </Link>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge variant="secondary" className="px-1.5 py-0 rounded-sm font-normal text-[10px]">
+                            {t(`subscriptions.categories.${subscription.category}`)}
+                          </Badge>
+                          {subscription.isCancellationCandidate && (
+                            <Badge variant="outline" className="border-amber-500/50 bg-amber-500/10 text-amber-600 px-1.5 py-0 text-[10px] font-bold">
+                              Candidate
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
-                    <TableCell className="px-4 py-4 align-top">
+                    <TableCell className="px-6 py-5 align-top">
                       <div className="grid gap-1">
-                        <span>{formatIdr(subscription.price, i18n.resolvedLanguage ?? "en")}</span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-lg font-bold">{formatIdr(subscription.price, i18n.resolvedLanguage ?? "en")}</span>
+                        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
                           {t(`subscriptions.billingCycles.${subscription.billingCycle}`)}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="px-4 py-4 align-top">
+                    <TableCell className="px-6 py-5 align-top">
                       <BillingDate subscription={subscription} />
                     </TableCell>
-                    <TableCell className="px-4 py-4 align-top">
-                      <span
-                        className="block truncate"
-                        title={
-                          subscription.paymentMethod ??
-                          t("subscriptions.list.paymentMethodFallback")
-                        }
-                      >
-                        {subscription.paymentMethod ??
-                          t("subscriptions.list.paymentMethodFallback")}
-                      </span>
+                    <TableCell className="px-6 py-5 align-top">
+                      <div className="grid gap-1.5">
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <span
+                            className="block truncate text-sm font-medium"
+                            title={
+                              subscription.paymentMethod ??
+                              t("subscriptions.list.paymentMethodFallback")
+                            }
+                          >
+                            {subscription.paymentMethod ??
+                              t("subscriptions.list.paymentMethodFallback")}
+                          </span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {t(`subscriptions.billingSources.${subscription.billingSource}`)}
+                        </span>
+                      </div>
                     </TableCell>
-                    <TableCell className="px-4 py-4 align-top">
-                      {t(`subscriptions.billingSources.${subscription.billingSource}`)}
+                    <TableCell className="px-6 py-5 align-top">
+                      <div className="grid gap-1.5 items-start">
+                        <StatusBadge status={subscription.status} />
+                        <span className="text-xs text-muted-foreground">
+                          {t(`subscriptions.usageFrequencies.${subscription.usageFrequency}`)}
+                        </span>
+                      </div>
                     </TableCell>
-                    <TableCell className="px-4 py-4 align-top">
-                      <StatusBadge status={subscription.status} />
-                    </TableCell>
-                    <TableCell className="px-4 py-4 align-top">
-                      {t(`subscriptions.usageFrequencies.${subscription.usageFrequency}`)}
-                    </TableCell>
-                    <TableCell className="px-4 py-4 align-top text-center">
+                    <TableCell className="px-6 py-5 align-top text-center">
                       <SubscriptionActions subscription={subscription} />
                     </TableCell>
                   </TableRow>
@@ -323,59 +345,77 @@ function SubscriptionsPage() {
 
           <div className="mt-8 grid gap-4 lg:hidden">
             {subscriptions.data.items.map((subscription) => (
-              <Card key={subscription.id}>
-                <CardContent className="grid gap-5 pt-6">
+              <Card key={subscription.id} className="overflow-hidden shadow-sm">
+                <CardContent className="grid gap-5 p-5">
                   <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h2 className="font-semibold">{subscription.name}</h2>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {t(`subscriptions.categories.${subscription.category}`)}
+                    <div className="min-w-0 flex-1">
+                      <h2 className="font-bold text-lg break-words" title={subscription.name}>
+                        <Link to="/subscriptions/$subscriptionId" params={{ subscriptionId: subscription.id }} className="hover:underline decoration-primary/50 underline-offset-4 transition-all">
+                          {subscription.name}
+                        </Link>
+                      </h2>
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        <Badge variant="secondary" className="px-1.5 py-0 rounded-sm font-normal text-[10px]">
+                          {t(`subscriptions.categories.${subscription.category}`)}
+                        </Badge>
+                        <StatusBadge status={subscription.status} />
+                        {subscription.isCancellationCandidate && (
+                          <Badge variant="outline" className="border-amber-500/50 bg-amber-500/10 text-amber-600 px-1.5 py-0 text-[10px] font-bold">
+                            Candidate
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-bold text-lg">{formatIdr(subscription.price, i18n.resolvedLanguage ?? "en")}</p>
+                      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">
+                        {t(`subscriptions.billingCycles.${subscription.billingCycle}`)}
                       </p>
                     </div>
-                    <StatusBadge status={subscription.status} />
                   </div>
+                  
+                  <div className="h-px bg-border/50 w-full" />
+
                   <dl className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <dt className="text-muted-foreground">{t("subscriptions.fields.price")}</dt>
-                      <dd className="mt-1 font-medium">
-                        {formatIdr(subscription.price, i18n.resolvedLanguage ?? "en")}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">
+                      <dt className="text-xs text-muted-foreground mb-1">
                         {t("subscriptions.fields.nextBillingDate")}
                       </dt>
-                      <dd className="mt-1">
+                      <dd>
                         <BillingDate subscription={subscription} />
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-muted-foreground">
+                      <dt className="text-xs text-muted-foreground mb-1">
                         {t("subscriptions.fields.paymentMethod")}
                       </dt>
-                      <dd className="mt-1 font-medium">
-                        {subscription.paymentMethod ??
-                          t("subscriptions.list.paymentMethodFallback")}
+                      <dd className="font-medium flex items-center gap-1.5">
+                        <CreditCard className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="truncate">
+                          {subscription.paymentMethod ?? t("subscriptions.list.paymentMethodFallback")}
+                        </span>
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-muted-foreground">
+                      <dt className="text-xs text-muted-foreground mb-1">
                         {t("subscriptions.fields.usageFrequency")}
                       </dt>
-                      <dd className="mt-1 font-medium">
+                      <dd className="font-medium">
                         {t(`subscriptions.usageFrequencies.${subscription.usageFrequency}`)}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-muted-foreground">
+                      <dt className="text-xs text-muted-foreground mb-1">
                         {t("subscriptions.fields.billingSource")}
                       </dt>
-                      <dd className="mt-1 font-medium">
+                      <dd className="font-medium">
                         {t(`subscriptions.billingSources.${subscription.billingSource}`)}
                       </dd>
                     </div>
                   </dl>
-                  <SubscriptionActions subscription={subscription} />
+                  <div className="pt-2">
+                    <SubscriptionActions subscription={subscription} />
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -398,10 +438,13 @@ function BillingDate({ subscription }: { subscription: Subscription }) {
   const isPast = subscription.nextBillingDate < getJakartaDateOnly();
 
   return (
-    <div className="grid gap-1">
-      <span>{formatDateOnly(subscription.nextBillingDate, i18n.resolvedLanguage ?? "en")}</span>
+    <div className="grid gap-1.5">
+      <div className="flex items-center gap-2">
+        <CalendarIcon className={`h-4 w-4 shrink-0 ${isPast ? 'text-destructive' : 'text-muted-foreground'}`} />
+        <span className="text-sm font-medium">{formatDateOnly(subscription.nextBillingDate, i18n.resolvedLanguage ?? "en")}</span>
+      </div>
       {isPast ? (
-        <span className="text-xs text-amber-700 dark:text-amber-300">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-destructive bg-destructive/10 w-fit px-1.5 py-0.5 rounded-sm">
           {t("subscriptions.list.pastDue")}
         </span>
       ) : null}
@@ -427,15 +470,25 @@ function SubscriptionActions({ subscription }: { subscription: Subscription }) {
 
   return (
     <div className="flex flex-nowrap items-center justify-center gap-1.5">
-      <HowToCancelDialog subscription={subscription} disabled={isPending} />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button size="icon-sm" variant="ghost" disabled={isPending}>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link to="/subscriptions/$subscriptionId" params={{ subscriptionId: subscription.id }}>
+              <Eye aria-hidden="true" />
+              <span>Detail Subscription</span>
+            </Link>
+          </DropdownMenuItem>
 
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            size="icon-sm"
-            aria-label={t("subscriptions.actions.renewLabel", { name: subscription.name })}
+          <HowToCancelDialog subscription={subscription} disabled={isPending} triggerAsMenuItem />
+          
+          <DropdownMenuItem
             disabled={isPending}
+            className="cursor-pointer"
             onClick={() =>
               renewMutation.mutate(subscription.id, {
                 onError: showError,
@@ -444,69 +497,12 @@ function SubscriptionActions({ subscription }: { subscription: Subscription }) {
             }
           >
             <RefreshCwIcon aria-hidden="true" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="top" sideOffset={6}>
-          {t("subscriptions.actions.renewSubscription")}
-        </TooltipContent>
-      </Tooltip>
+            <span>{t("subscriptions.actions.renewSubscription")}</span>
+          </DropdownMenuItem>
 
-      <AlertDialog>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <AlertDialogTrigger asChild>
-              <Button
-                type="button"
-                size="icon-sm"
-                variant="destructive"
-                aria-label={t("subscriptions.actions.cancelLabel", { name: subscription.name })}
-                disabled={isPending || subscription.status === "CANCELLED"}
-              >
-                <CircleXIcon aria-hidden="true" />
-              </Button>
-            </AlertDialogTrigger>
-          </TooltipTrigger>
-          <TooltipContent side="top" sideOffset={6}>
-            {t("subscriptions.actions.cancelSubscription")}
-          </TooltipContent>
-        </Tooltip>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("subscriptions.cancel.title")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("subscriptions.cancel.description", { name: subscription.name })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("subscriptions.actions.cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={() =>
-                cancelMutation.mutate(subscription.id, {
-                  onError: showError,
-                  onSuccess: () => toast.success(t("subscriptions.toast.cancelled")),
-                })
-              }
-            >
-              {t("subscriptions.actions.confirmCancellation")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            size="icon-sm"
-            variant={subscription.isCancellationCandidate ? "secondary" : "outline"}
-            aria-label={t(
-              subscription.isCancellationCandidate
-                ? "subscriptions.actions.unmarkCandidateLabel"
-                : "subscriptions.actions.markCandidateLabel",
-              { name: subscription.name },
-            )}
+          <DropdownMenuItem
             disabled={isPending || subscription.status === "CANCELLED"}
+            className="cursor-pointer"
             onClick={() =>
               candidateMutation.mutate(
                 {
@@ -525,16 +521,16 @@ function SubscriptionActions({ subscription }: { subscription: Subscription }) {
             ) : (
               <BookmarkIcon aria-hidden="true" />
             )}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="top" sideOffset={6}>
-          {t(
-            subscription.isCancellationCandidate
-              ? "subscriptions.actions.unmarkCandidate"
-              : "subscriptions.actions.markCandidate",
-          )}
-        </TooltipContent>
-      </Tooltip>
+            <span>
+              {t(
+                subscription.isCancellationCandidate
+                  ? "subscriptions.actions.unmarkCandidate"
+                  : "subscriptions.actions.markCandidate",
+              )}
+            </span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       <Tooltip>
         <TooltipTrigger asChild>

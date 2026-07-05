@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@repo/ui/components/dialog";
 import { CircleHelpIcon } from "@repo/ui/components/icons";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/tooltip";
+import { DropdownMenuItem } from "@repo/ui/components/dropdown-menu";
 import { useState } from "react";
 import {
   billingSourcePromptChoices,
@@ -28,9 +28,10 @@ type DialogStep = "guide" | "recurring-payment" | "source-question";
 type HowToCancelDialogProps = {
   disabled?: boolean;
   subscription: Subscription;
+  triggerAsMenuItem?: boolean;
 };
 
-export function HowToCancelDialog({ disabled, subscription }: HowToCancelDialogProps) {
+export function HowToCancelDialog({ disabled, subscription, triggerAsMenuItem }: HowToCancelDialogProps) {
   const { t } = useTranslation();
   const mutation = useBillingSourceMutation();
   const [activeSource, setActiveSource] = useState<BillingSource>(subscription.billingSource);
@@ -89,26 +90,39 @@ export function HowToCancelDialog({ disabled, subscription }: HowToCancelDialogP
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <DialogTrigger asChild>
-            <Button
-              type="button"
-              size="icon-sm"
-              variant="outline"
-              aria-label={t("subscriptions.actions.howToCancelLabel", {
-                name: subscription.name,
-              })}
-              disabled={disabled}
-            >
-              <CircleHelpIcon aria-hidden="true" />
-            </Button>
-          </DialogTrigger>
-        </TooltipTrigger>
-        <TooltipContent side="top" sideOffset={6}>
-          {t("subscriptions.actions.howToCancel")}
-        </TooltipContent>
-      </Tooltip>
+      {triggerAsMenuItem ? (
+        <DialogTrigger asChild>
+          <DropdownMenuItem
+            onSelect={(e) => e.preventDefault()}
+            disabled={disabled}
+            className="cursor-pointer"
+          >
+            <CircleHelpIcon aria-hidden="true" />
+            <span>{t("subscriptions.actions.howToCancel")}</span>
+          </DropdownMenuItem>
+        </DialogTrigger>
+      ) : (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DialogTrigger asChild>
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="outline"
+                aria-label={t("subscriptions.actions.howToCancelLabel", {
+                  name: subscription.name,
+                })}
+                disabled={disabled}
+              >
+                <CircleHelpIcon aria-hidden="true" />
+              </Button>
+            </DialogTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="top" sideOffset={6}>
+            {t("subscriptions.actions.howToCancel")}
+          </TooltipContent>
+        </Tooltip>
+      )}
 
       <DialogContent
         className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl"
