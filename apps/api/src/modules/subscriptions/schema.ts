@@ -2,6 +2,17 @@ import { z } from "zod";
 import { isValidDateOnly } from "../../utils/date";
 
 export const billingCycles = ["MONTHLY", "YEARLY"] as const;
+export const billingSources = [
+  "APPLE_APP_STORE",
+  "GOOGLE_PLAY",
+  "MERCHANT_WEBSITE",
+  "IN_APP_DIRECT",
+  "E_WALLET",
+  "CARD_OR_BANK",
+  "TELCO_BUNDLE",
+  "INVOICE_MANUAL",
+  "UNKNOWN",
+] as const;
 export const subscriptionCategories = [
   "ENTERTAINMENT",
   "WORK_TOOLS",
@@ -22,24 +33,33 @@ export const usageFrequencies = ["OFTEN", "SOMETIMES", "RARELY", "NOT_SURE"] as 
 
 const optionalText = (maximum: number) => z.string().trim().max(maximum).nullable().optional();
 
+const subscriptionShape = {
+  billingCycle: z.enum(billingCycles),
+  billingSource: z.enum(billingSources),
+  category: z.enum(subscriptionCategories),
+  currency: z.literal("IDR"),
+  isCancellationCandidate: z.boolean(),
+  name: z.string().trim().min(2).max(80),
+  nextBillingDate: z.string().refine(isValidDateOnly, "Invalid calendar date"),
+  notes: optionalText(500),
+  paymentMethod: optionalText(80),
+  price: z.number().finite().positive().max(9_999_999_999.99),
+  status: z.enum(subscriptionStatuses),
+  usageFrequency: z.enum(usageFrequencies),
+};
+
 export const subscriptionInputSchema = z
   .object({
-    billingCycle: z.enum(billingCycles),
-    category: z.enum(subscriptionCategories),
-    currency: z.literal("IDR"),
-    isCancellationCandidate: z.boolean().default(false),
-    name: z.string().trim().min(2).max(80),
-    nextBillingDate: z.string().refine(isValidDateOnly, "Invalid calendar date"),
-    notes: optionalText(500),
-    paymentMethod: optionalText(80),
-    price: z.number().finite().positive().max(9_999_999_999.99),
-    status: z.enum(subscriptionStatuses),
-    usageFrequency: z.enum(usageFrequencies),
+    ...subscriptionShape,
+    billingSource: subscriptionShape.billingSource.default("UNKNOWN"),
+    isCancellationCandidate: subscriptionShape.isCancellationCandidate.default(false),
   })
   .strict();
 
-export const subscriptionUpdateSchema = subscriptionInputSchema
+export const subscriptionUpdateSchema = z
+  .object(subscriptionShape)
   .partial()
+  .strict()
   .refine((value) => Object.keys(value).length > 0, "At least one field is required");
 
 export const subscriptionIdSchema = z.object({ id: z.string().trim().min(1) }).strict();

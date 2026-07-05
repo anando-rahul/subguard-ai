@@ -1,4 +1,15 @@
 export const billingCycles = ["MONTHLY", "YEARLY"] as const;
+export const billingSources = [
+  "APPLE_APP_STORE",
+  "GOOGLE_PLAY",
+  "MERCHANT_WEBSITE",
+  "IN_APP_DIRECT",
+  "E_WALLET",
+  "CARD_OR_BANK",
+  "TELCO_BUNDLE",
+  "INVOICE_MANUAL",
+  "UNKNOWN",
+] as const;
 export const subscriptionCategories = [
   "ENTERTAINMENT",
   "WORK_TOOLS",
@@ -18,6 +29,7 @@ export const subscriptionStatuses = [
 export const usageFrequencies = ["OFTEN", "SOMETIMES", "RARELY", "NOT_SURE"] as const;
 
 export type BillingCycle = (typeof billingCycles)[number];
+export type BillingSource = (typeof billingSources)[number];
 export type SubscriptionCategory = (typeof subscriptionCategories)[number];
 export type SubscriptionStatus = (typeof subscriptionStatuses)[number];
 export type UsageFrequency = (typeof usageFrequencies)[number];
@@ -25,6 +37,7 @@ export type SubscriptionSort = "nextBillingDateAsc" | "nextBillingDateDesc";
 
 export type Subscription = {
   billingCycle: BillingCycle;
+  billingSource: BillingSource;
   category: SubscriptionCategory;
   createdAt: string;
   currency: "IDR";
@@ -42,6 +55,7 @@ export type Subscription = {
 
 export type SubscriptionInput = {
   billingCycle: BillingCycle;
+  billingSource: BillingSource;
   category: SubscriptionCategory;
   currency: "IDR";
   isCancellationCandidate: boolean;

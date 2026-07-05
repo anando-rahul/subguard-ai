@@ -18,6 +18,7 @@ import { type FormEvent, useState } from "react";
 import { validateSubscriptionForm } from "../../modules/subscriptions/schema";
 import {
   billingCycles,
+  billingSources,
   subscriptionCategories,
   subscriptionStatuses,
   usageFrequencies,
@@ -236,6 +237,30 @@ export function SubscriptionForm({
                   onChange={(event) => update("paymentMethod", event.target.value)}
                 />
                 <FieldError>{errorMessage("paymentMethod")}</FieldError>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="subscription-billing-source">
+                  {t("subscriptions.fields.billingSource")}
+                </FieldLabel>
+                <NativeSelect
+                  id="subscription-billing-source"
+                  className="w-full"
+                  value={values.billingSource}
+                  onChange={(event) =>
+                    update(
+                      "billingSource",
+                      event.target.value as SubscriptionFormValues["billingSource"],
+                    )
+                  }
+                >
+                  {billingSources.map((source) => (
+                    <NativeSelectOption key={source} value={source}>
+                      {t(`subscriptions.billingSources.${source}`)}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+                <FieldDescription>{t("subscriptions.form.billingSourceHint")}</FieldDescription>
               </Field>
             </div>
 

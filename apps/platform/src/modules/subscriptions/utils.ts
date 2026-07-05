@@ -2,6 +2,7 @@ import type { Subscription, SubscriptionFormValues } from "./types";
 
 export const emptySubscriptionForm: SubscriptionFormValues = {
   billingCycle: "MONTHLY",
+  billingSource: "UNKNOWN",
   category: "ENTERTAINMENT",
   currency: "IDR",
   isCancellationCandidate: false,
@@ -17,6 +18,7 @@ export const emptySubscriptionForm: SubscriptionFormValues = {
 export function subscriptionToFormValues(subscription: Subscription): SubscriptionFormValues {
   return {
     billingCycle: subscription.billingCycle,
+    billingSource: subscription.billingSource,
     category: subscription.category,
     currency: subscription.currency,
     isCancellationCandidate: subscription.isCancellationCandidate,
@@ -57,4 +59,16 @@ export function getJakartaDateOnly(value = new Date()) {
   const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
 
   return `${values.year}-${values.month}-${values.day}`;
+}
+
+export function needsBillingAttention(
+  subscription: Pick<Subscription, "nextBillingDate" | "status">,
+  today = getJakartaDateOnly(),
+) {
+  if (subscription.status === "CANCELLED") return false;
+
+  const cutoff = new Date(`${today}T00:00:00.000Z`);
+  cutoff.setUTCDate(cutoff.getUTCDate() + 7);
+
+  return subscription.nextBillingDate <= cutoff.toISOString().slice(0, 10);
 }

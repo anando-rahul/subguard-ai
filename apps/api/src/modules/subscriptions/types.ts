@@ -1,5 +1,6 @@
 import type {
   BillingCycle,
+  BillingSource,
   Currency,
   SubscriptionCategory,
   SubscriptionStatus,
@@ -8,6 +9,7 @@ import type {
 
 export type SubscriptionResponse = {
   billingCycle: BillingCycle;
+  billingSource: BillingSource;
   category: SubscriptionCategory;
   createdAt: string;
   currency: Currency;

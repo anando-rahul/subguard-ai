@@ -19,5 +19,13 @@ describe("platform i18n", () => {
     );
     expect(i18n.t("subscriptions.actions.markCandidate", { lng: "en" })).toBe("Mark candidate");
     expect(i18n.t("subscriptions.categories.ENTERTAINMENT", { lng: "id" })).toBe("Hiburan");
+    expect(i18n.t("subscriptions.billingSources.UNKNOWN", { lng: "en" })).toBe("I Am Not Sure");
+    expect(i18n.t("subscriptions.billingSources.CARD_OR_BANK", { lng: "id" })).toBe(
+      "Debit Otomatis Kartu/Bank",
+    );
+    expect(i18n.t("subscriptions.actions.howToCancel", { lng: "en" })).toBe("How To Cancel");
+    expect(i18n.t("subscriptions.cancellation.sourceQuestion.title", { lng: "id" })).toBe(
+      "Di mana Anda berlangganan layanan ini?",
+    );
   });
 });

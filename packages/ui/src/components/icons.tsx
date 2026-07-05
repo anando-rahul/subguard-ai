@@ -1,6 +1,7 @@
 export {
   BookmarkCheckIcon,
   BookmarkIcon,
+  CircleHelpIcon,
   CircleXIcon,
   PencilIcon,
   RefreshCwIcon,

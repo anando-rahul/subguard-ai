@@ -15,6 +15,18 @@ enum BillingCycle {
   YEARLY
 }
 
+enum BillingSource {
+  APPLE_APP_STORE
+  GOOGLE_PLAY
+  MERCHANT_WEBSITE
+  IN_APP_DIRECT
+  E_WALLET
+  CARD_OR_BANK
+  TELCO_BUNDLE
+  INVOICE_MANUAL
+  UNKNOWN
+}
+
 enum SubscriptionCategory {
   ENTERTAINMENT
   WORK_TOOLS
@@ -103,6 +115,7 @@ model Subscription {
   price                   Decimal              @db.Decimal(12, 2)
   currency                Currency             @default(IDR)
   billingCycle            BillingCycle
+  billingSource           BillingSource        @default(UNKNOWN)
   nextBillingDate         DateTime             @db.Date
   category                SubscriptionCategory
   status                  SubscriptionStatus

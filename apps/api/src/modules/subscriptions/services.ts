@@ -14,6 +14,7 @@ function nullableText(value: string | null | undefined) {
 export function serializeSubscription(subscription: Subscription): SubscriptionResponse {
   return {
     billingCycle: subscription.billingCycle,
+    billingSource: subscription.billingSource,
     category: subscription.category,
     createdAt: subscription.createdAt.toISOString(),
     currency: subscription.currency,
@@ -69,6 +70,7 @@ function toUpdateData(input: SubscriptionUpdateInput) {
   const data: Prisma.SubscriptionUncheckedUpdateInput = {};
 
   if (input.billingCycle !== undefined) data.billingCycle = input.billingCycle;
+  if (input.billingSource !== undefined) data.billingSource = input.billingSource;
   if (input.category !== undefined) data.category = input.category;
   if (input.currency !== undefined) data.currency = input.currency;
   if (input.isCancellationCandidate !== undefined) {

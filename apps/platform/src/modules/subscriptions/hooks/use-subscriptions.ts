@@ -7,6 +7,7 @@ import {
   listSubscriptions,
   renewSubscription,
   updateSubscription,
+  updateSubscriptionBillingSource,
   updateSubscriptionCandidate,
   updateSubscriptionStatus,
 } from "../services";
@@ -54,6 +55,10 @@ export function useCreateSubscriptionMutation() {
 
 export function useUpdateSubscriptionMutation() {
   return useProductMutation(updateSubscription);
+}
+
+export function useBillingSourceMutation() {
+  return useProductMutation(updateSubscriptionBillingSource);
 }
 
 export function useDeleteSubscriptionMutation() {

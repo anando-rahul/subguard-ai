@@ -15,7 +15,12 @@ import {
 } from "../modules/dashboard/hooks/use-dashboard";
 import type { DashboardSummary, UpcomingBillingItem } from "../modules/dashboard/types";
 import { subscriptionsQueryOptions } from "../modules/subscriptions/hooks/use-subscriptions";
-import { formatDateOnly, formatIdr } from "../modules/subscriptions/utils";
+import {
+  formatDateOnly,
+  formatIdr,
+  getJakartaDateOnly,
+  needsBillingAttention,
+} from "../modules/subscriptions/utils";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: async ({ context }) => {
@@ -62,7 +67,9 @@ function DashboardPage() {
   const identity = user.data.name || user.data.email;
   const isEmpty = subscriptions.data?.items.length === 0;
   const hasSubscriptions = Boolean(subscriptions.data?.items.length);
-  const dueSoon = upcoming.data?.items.filter((item) => item.isDueSoon) ?? [];
+  const today = getJakartaDateOnly();
+  const billingAttentionItems =
+    subscriptions.data?.items.filter((item) => needsBillingAttention(item, today)) ?? [];
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
@@ -128,7 +135,9 @@ function DashboardPage() {
 
       {hasSubscriptions && summary.data ? <SummaryCards summary={summary.data} /> : null}
 
-      {hasSubscriptions && dueSoon.length > 0 ? <DueSoonAlert items={dueSoon} /> : null}
+      {hasSubscriptions && billingAttentionItems.length > 0 ? (
+        <BillingAttentionAlert items={billingAttentionItems} />
+      ) : null}
 
       {hasSubscriptions ? (
         <section className="mt-10" aria-labelledby="upcoming-heading">
@@ -263,7 +272,7 @@ function SummaryCards({ summary }: { summary: DashboardSummary }) {
   );
 }
 
-function DueSoonAlert({ items }: { items: UpcomingBillingItem[] }) {
+function BillingAttentionAlert({ items }: { items: Array<{ name: string }> }) {
   const { t } = useTranslation();
 
   return (

@@ -194,9 +194,9 @@ const resources = {
           error: "Your subscriptions are safe, but the current totals could not be calculated.",
         },
         reminder: {
-          badge: "{{count}} due soon",
+          badge: "{{count}} need attention",
           title: "{{count}} billing dates need attention",
-          description: "Due within seven days: {{names}}.",
+          description: "Past due or due within seven days: {{names}}.",
         },
         upcoming: {
           eyebrow: "Next on your calendar",
@@ -242,6 +242,7 @@ const resources = {
         fields: {
           actions: "Actions",
           billingCycle: "Billing cycle",
+          billingSource: "Billing Source",
           candidate: "Cancellation candidate",
           category: "Category",
           name: "Service name",
@@ -254,6 +255,8 @@ const resources = {
         },
         form: {
           eyebrow: "Manual subscription record",
+          billingSourceHint:
+            "Optional. This helps SubGuardAI show the most relevant cancellation steps.",
           priceHint: "Enter the amount in IDR.",
           pastDateWarning: "This billing date has passed. Please update it if needed.",
           candidateHint: "Include this subscription in your potential saving estimate.",
@@ -290,6 +293,8 @@ const resources = {
           deleteLabel: "Delete {{name}}",
           edit: "Edit",
           editLabel: "Edit {{name}}",
+          howToCancel: "How To Cancel",
+          howToCancelLabel: "How to cancel {{name}}",
           markCandidate: "Mark candidate",
           markCandidateLabel: "Mark {{name}} as a cancellation candidate",
           retry: "Try again",
@@ -308,6 +313,121 @@ const resources = {
           title: "Cancel this subscription?",
           description:
             "{{name}} will be marked as cancelled and excluded from active totals and billing reminders.",
+        },
+        cancellation: {
+          sourceQuestion: {
+            title: "Where did you subscribe to this service?",
+            description:
+              "Choose the billing source for {{name}}. We will save it and show the relevant cancellation steps.",
+            options: {
+              APPLE_APP_STORE: "Apple App Store",
+              GOOGLE_PLAY: "Google Play",
+              MERCHANT_WEBSITE: "Service website",
+              IN_APP_DIRECT: "Inside the service app",
+              RECURRING_PAYMENT: "E-wallet / bank / card recurring payment",
+              TELCO_BUNDLE: "Telco bundle",
+              INVOICE_MANUAL: "Invoice/manual renewal",
+              UNKNOWN: "I'm not sure",
+            },
+          },
+          recurringPayment: {
+            title: "Which recurring payment method did you use?",
+            description:
+              "Choose one so the saved billing source and cancellation steps stay accurate.",
+            options: {
+              E_WALLET: "E-wallet",
+              CARD_OR_BANK: "Bank or card",
+            },
+          },
+          guide: {
+            title: "How to cancel {{name}}",
+            description: "Suggested steps for subscriptions billed through {{source}}.",
+            note: "Exact menu names may vary. Keep the provider's confirmation and verify that automatic renewal is turned off.",
+          },
+          actions: {
+            back: "Back",
+            changeSource: "Change billing source",
+            close: "Close",
+          },
+          saveError: {
+            title: "Billing source not saved",
+            description: "We could not save this billing source. Please try again.",
+          },
+          guides: {
+            APPLE_APP_STORE: {
+              steps: {
+                1: "Open device Settings and select your Apple Account.",
+                2: "Open Subscriptions and select the service.",
+                3: "Choose Cancel Subscription and confirm.",
+                4: "If it is not listed, check another Apple Account or the service's own billing settings.",
+              },
+            },
+            GOOGLE_PLAY: {
+              steps: {
+                1: "Open Google Play and select the profile used to subscribe.",
+                2: "Open Payments & subscriptions, then Subscriptions.",
+                3: "Select the service, choose Cancel subscription, and confirm.",
+                4: "If it is not listed, check another Google account or the service's own billing settings.",
+              },
+            },
+            MERCHANT_WEBSITE: {
+              steps: {
+                1: "Sign in on the service's official website.",
+                2: "Open account, plan, membership, or billing settings.",
+                3: "Choose cancel or turn off auto-renewal, then complete the confirmation.",
+                4: "Keep the confirmation email or screenshot and verify the access-end date.",
+              },
+            },
+            IN_APP_DIRECT: {
+              steps: {
+                1: "Open the service app and sign in to the account that owns the subscription.",
+                2: "Open account, settings, plan, or subscription management.",
+                3: "Choose cancel or turn off auto-renewal, then confirm.",
+                4: "If there is no cancellation control, use the app's official support channel.",
+              },
+            },
+            E_WALLET: {
+              steps: {
+                1: "Open the e-wallet used for payment.",
+                2: "Find automatic payments, recurring payments, or linked merchants.",
+                3: "Select the service and stop or revoke the recurring authorization.",
+                4: "Confirm in the service account that renewal is also disabled.",
+              },
+            },
+            CARD_OR_BANK: {
+              steps: {
+                1: "First cancel from the service's account or billing settings.",
+                2: "Review recurring payments, auto-debits, or standing instructions in the bank or card app.",
+                3: "Stop the relevant instruction if supported, or contact the card issuer or bank.",
+                4: "Verify future statements; replacing or blocking a card is not the normal first step.",
+              },
+            },
+            TELCO_BUNDLE: {
+              steps: {
+                1: "Open the mobile operator's app, website, or subscription-management channel.",
+                2: "Find active add-ons, content services, or bundles.",
+                3: "Select the service and unsubscribe or disable renewal.",
+                4: "Check the next mobile bill or prepaid balance for confirmation.",
+              },
+            },
+            INVOICE_MANUAL: {
+              steps: {
+                1: "Check the invoice or agreement for renewal and notice terms.",
+                2: "Contact the provider before the renewal deadline and request non-renewal.",
+                3: "Ask for written confirmation.",
+                4: "Do not assume that ignoring an invoice automatically cancels a contract.",
+              },
+            },
+            UNKNOWN: {
+              steps: {
+                1: "Check the purchase receipt or renewal email.",
+                2: "Check your Apple and Google subscription lists.",
+                3: "Review the service's account and billing settings.",
+                4: "Review e-wallet, bank, card, and telco recurring-payment records.",
+                5: "Contact the service's official support if you still cannot identify the billing source.",
+              },
+            },
+          },
         },
         toast: {
           cancelled: "Subscription cancelled.",
@@ -328,6 +448,17 @@ const resources = {
         billingCycles: {
           MONTHLY: "Monthly",
           YEARLY: "Yearly",
+        },
+        billingSources: {
+          APPLE_APP_STORE: "Apple App Store",
+          GOOGLE_PLAY: "Google Play",
+          MERCHANT_WEBSITE: "Service Website",
+          IN_APP_DIRECT: "Inside the Service App",
+          E_WALLET: "E-Wallet Recurring Payment",
+          CARD_OR_BANK: "Card/Bank Auto-Charge",
+          TELCO_BUNDLE: "Telco/Mobile Bundle",
+          INVOICE_MANUAL: "Invoice/Manual Renewal",
+          UNKNOWN: "I Am Not Sure",
         },
         categories: {
           ENTERTAINMENT: "Entertainment",
@@ -549,9 +680,9 @@ const resources = {
           error: "Data langganan Anda aman, tetapi total saat ini tidak dapat dihitung.",
         },
         reminder: {
-          badge: "{{count}} segera jatuh tempo",
+          badge: "{{count}} perlu diperhatikan",
           title: "{{count}} tanggal tagihan perlu diperhatikan",
-          description: "Jatuh tempo dalam tujuh hari: {{names}}.",
+          description: "Sudah lewat atau jatuh tempo dalam tujuh hari: {{names}}.",
         },
         upcoming: {
           eyebrow: "Berikutnya di kalender Anda",
@@ -597,6 +728,7 @@ const resources = {
         fields: {
           actions: "Tindakan",
           billingCycle: "Siklus tagihan",
+          billingSource: "Sumber Tagihan",
           candidate: "Kandidat pembatalan",
           category: "Kategori",
           name: "Nama layanan",
@@ -609,6 +741,8 @@ const resources = {
         },
         form: {
           eyebrow: "Catatan langganan manual",
+          billingSourceHint:
+            "Opsional. Informasi ini membantu SubGuardAI menampilkan langkah pembatalan yang paling sesuai.",
           priceHint: "Masukkan jumlah dalam IDR.",
           pastDateWarning: "Tanggal tagihan ini telah lewat. Perbarui jika diperlukan.",
           candidateHint: "Sertakan langganan ini dalam estimasi potensi penghematan.",
@@ -645,6 +779,8 @@ const resources = {
           deleteLabel: "Hapus {{name}}",
           edit: "Edit",
           editLabel: "Edit {{name}}",
+          howToCancel: "Cara Membatalkan",
+          howToCancelLabel: "Cara membatalkan {{name}}",
           markCandidate: "Tandai kandidat",
           markCandidateLabel: "Tandai {{name}} sebagai kandidat pembatalan",
           retry: "Coba lagi",
@@ -663,6 +799,121 @@ const resources = {
           title: "Batalkan langganan ini?",
           description:
             "{{name}} akan ditandai dibatalkan dan dikeluarkan dari total aktif serta pengingat tagihan.",
+        },
+        cancellation: {
+          sourceQuestion: {
+            title: "Di mana Anda berlangganan layanan ini?",
+            description:
+              "Pilih sumber tagihan untuk {{name}}. Kami akan menyimpannya dan menampilkan langkah pembatalan yang sesuai.",
+            options: {
+              APPLE_APP_STORE: "Apple App Store",
+              GOOGLE_PLAY: "Google Play",
+              MERCHANT_WEBSITE: "Situs web layanan",
+              IN_APP_DIRECT: "Di dalam aplikasi layanan",
+              RECURRING_PAYMENT: "Pembayaran berulang e-wallet / bank / kartu",
+              TELCO_BUNDLE: "Paket operator seluler",
+              INVOICE_MANUAL: "Tagihan/perpanjangan manual",
+              UNKNOWN: "Saya tidak yakin",
+            },
+          },
+          recurringPayment: {
+            title: "Metode pembayaran berulang mana yang Anda gunakan?",
+            description:
+              "Pilih salah satu agar sumber tagihan dan langkah pembatalan yang tersimpan tetap akurat.",
+            options: {
+              E_WALLET: "E-wallet",
+              CARD_OR_BANK: "Bank atau kartu",
+            },
+          },
+          guide: {
+            title: "Cara membatalkan {{name}}",
+            description: "Saran langkah untuk langganan yang ditagihkan melalui {{source}}.",
+            note: "Nama menu dapat berbeda. Simpan konfirmasi dari penyedia dan pastikan perpanjangan otomatis telah dinonaktifkan.",
+          },
+          actions: {
+            back: "Kembali",
+            changeSource: "Ubah sumber tagihan",
+            close: "Tutup",
+          },
+          saveError: {
+            title: "Sumber tagihan belum tersimpan",
+            description: "Kami tidak dapat menyimpan sumber tagihan ini. Silakan coba lagi.",
+          },
+          guides: {
+            APPLE_APP_STORE: {
+              steps: {
+                1: "Buka Pengaturan perangkat dan pilih Akun Apple Anda.",
+                2: "Buka Langganan lalu pilih layanannya.",
+                3: "Pilih Batalkan Langganan lalu konfirmasi.",
+                4: "Jika tidak tercantum, periksa Akun Apple lain atau pengaturan tagihan layanan tersebut.",
+              },
+            },
+            GOOGLE_PLAY: {
+              steps: {
+                1: "Buka Google Play dan pilih profil yang digunakan untuk berlangganan.",
+                2: "Buka Pembayaran & langganan, lalu Langganan.",
+                3: "Pilih layanan, pilih Batalkan langganan, lalu konfirmasi.",
+                4: "Jika tidak tercantum, periksa akun Google lain atau pengaturan tagihan layanan tersebut.",
+              },
+            },
+            MERCHANT_WEBSITE: {
+              steps: {
+                1: "Masuk ke situs web resmi layanan.",
+                2: "Buka pengaturan akun, paket, keanggotaan, atau tagihan.",
+                3: "Pilih pembatalan atau nonaktifkan perpanjangan otomatis, lalu selesaikan konfirmasi.",
+                4: "Simpan email atau tangkapan layar konfirmasi dan periksa tanggal berakhirnya akses.",
+              },
+            },
+            IN_APP_DIRECT: {
+              steps: {
+                1: "Buka aplikasi layanan dan masuk ke akun pemilik langganan.",
+                2: "Buka pengelolaan akun, pengaturan, paket, atau langganan.",
+                3: "Pilih pembatalan atau nonaktifkan perpanjangan otomatis, lalu konfirmasi.",
+                4: "Jika tidak ada kontrol pembatalan, gunakan saluran dukungan resmi aplikasi.",
+              },
+            },
+            E_WALLET: {
+              steps: {
+                1: "Buka e-wallet yang digunakan untuk membayar.",
+                2: "Cari pembayaran otomatis, pembayaran berulang, atau merchant tertaut.",
+                3: "Pilih layanan lalu hentikan atau cabut otorisasi pembayaran berulang.",
+                4: "Pastikan perpanjangan juga dinonaktifkan di akun layanan.",
+              },
+            },
+            CARD_OR_BANK: {
+              steps: {
+                1: "Batalkan terlebih dahulu melalui pengaturan akun atau tagihan layanan.",
+                2: "Periksa pembayaran berulang, debit otomatis, atau instruksi berkala di aplikasi bank atau kartu.",
+                3: "Hentikan instruksi terkait jika didukung, atau hubungi penerbit kartu maupun bank.",
+                4: "Periksa laporan transaksi berikutnya; mengganti atau memblokir kartu bukan langkah pertama yang umum.",
+              },
+            },
+            TELCO_BUNDLE: {
+              steps: {
+                1: "Buka aplikasi, situs web, atau saluran pengelolaan langganan operator seluler.",
+                2: "Cari add-on, layanan konten, atau paket yang aktif.",
+                3: "Pilih layanan lalu berhenti berlangganan atau nonaktifkan perpanjangan.",
+                4: "Periksa tagihan seluler berikutnya atau saldo prabayar untuk konfirmasi.",
+              },
+            },
+            INVOICE_MANUAL: {
+              steps: {
+                1: "Periksa syarat perpanjangan dan pemberitahuan pada tagihan atau perjanjian.",
+                2: "Hubungi penyedia sebelum tenggat perpanjangan dan minta agar tidak diperpanjang.",
+                3: "Minta konfirmasi tertulis.",
+                4: "Jangan berasumsi bahwa mengabaikan tagihan otomatis membatalkan kontrak.",
+              },
+            },
+            UNKNOWN: {
+              steps: {
+                1: "Periksa bukti pembelian atau email perpanjangan.",
+                2: "Periksa daftar langganan Apple dan Google Anda.",
+                3: "Tinjau pengaturan akun dan tagihan layanan.",
+                4: "Tinjau catatan pembayaran berulang e-wallet, bank, kartu, dan operator seluler.",
+                5: "Hubungi dukungan resmi layanan jika sumber tagihan masih belum ditemukan.",
+              },
+            },
+          },
         },
         toast: {
           cancelled: "Langganan dibatalkan.",
@@ -683,6 +934,17 @@ const resources = {
         billingCycles: {
           MONTHLY: "Bulanan",
           YEARLY: "Tahunan",
+        },
+        billingSources: {
+          APPLE_APP_STORE: "Apple App Store",
+          GOOGLE_PLAY: "Google Play",
+          MERCHANT_WEBSITE: "Situs Web Layanan",
+          IN_APP_DIRECT: "Di Dalam Aplikasi Layanan",
+          E_WALLET: "Pembayaran Berulang E-Wallet",
+          CARD_OR_BANK: "Debit Otomatis Kartu/Bank",
+          TELCO_BUNDLE: "Paket Operator Seluler",
+          INVOICE_MANUAL: "Tagihan/Perpanjangan Manual",
+          UNKNOWN: "Saya Tidak Yakin",
         },
         categories: {
           ENTERTAINMENT: "Hiburan",

@@ -1,5 +1,6 @@
 import { apiClient } from "../../lib/api";
 import type {
+  BillingSource,
   Subscription,
   SubscriptionFilters,
   SubscriptionInput,
@@ -52,6 +53,22 @@ export async function createSubscription(input: SubscriptionInput) {
 export async function updateSubscription({ id, input }: { id: string; input: SubscriptionInput }) {
   const response = await apiClient.subscriptions[":id"].$patch({ json: input, param: { id } });
   await assertOk(response, "Failed to update subscription.");
+
+  return (await response.json()) as Subscription;
+}
+
+export async function updateSubscriptionBillingSource({
+  billingSource,
+  id,
+}: {
+  billingSource: BillingSource;
+  id: string;
+}) {
+  const response = await apiClient.subscriptions[":id"].$patch({
+    json: { billingSource },
+    param: { id },
+  });
+  await assertOk(response, "Failed to update billing source.");
 
   return (await response.json()) as Subscription;
 }

@@ -42,6 +42,7 @@ import {
 } from "@repo/ui/components/tooltip";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
+import { HowToCancelDialog } from "../../components/subscriptions/how-to-cancel-dialog";
 import { meQueryOptions } from "../../modules/auth/hooks/use-auth";
 import { UnauthorizedError } from "../../modules/auth/services";
 import {
@@ -239,15 +240,16 @@ function SubscriptionsPage() {
       {subscriptions.data && subscriptions.data.items.length > 0 ? (
         <TooltipProvider delayDuration={250}>
           <div className="mt-8 hidden overflow-x-auto rounded-xl border bg-card lg:block">
-            <Table className="min-w-[1260px] table-fixed">
+            <Table className="min-w-[1480px] table-fixed">
               <colgroup>
                 <col className="w-[220px]" />
                 <col className="w-[160px]" />
                 <col className="w-[180px]" />
                 <col className="w-[170px]" />
+                <col className="w-[200px]" />
                 <col className="w-[130px]" />
                 <col className="w-[160px]" />
-                <col className="w-[240px]" />
+                <col className="w-[260px]" />
               </colgroup>
               <TableHeader>
                 <TableRow>
@@ -257,6 +259,7 @@ function SubscriptionsPage() {
                     {t("subscriptions.fields.nextBillingDate")}
                   </TableHead>
                   <TableHead className="px-4">{t("subscriptions.fields.paymentMethod")}</TableHead>
+                  <TableHead className="px-4">{t("subscriptions.fields.billingSource")}</TableHead>
                   <TableHead className="px-4">{t("subscriptions.fields.status")}</TableHead>
                   <TableHead className="px-4">{t("subscriptions.fields.usageFrequency")}</TableHead>
                   <TableHead className="px-4 text-center">
@@ -299,6 +302,9 @@ function SubscriptionsPage() {
                         {subscription.paymentMethod ??
                           t("subscriptions.list.paymentMethodFallback")}
                       </span>
+                    </TableCell>
+                    <TableCell className="px-4 py-4 align-top">
+                      {t(`subscriptions.billingSources.${subscription.billingSource}`)}
                     </TableCell>
                     <TableCell className="px-4 py-4 align-top">
                       <StatusBadge status={subscription.status} />
@@ -360,6 +366,14 @@ function SubscriptionsPage() {
                         {t(`subscriptions.usageFrequencies.${subscription.usageFrequency}`)}
                       </dd>
                     </div>
+                    <div>
+                      <dt className="text-muted-foreground">
+                        {t("subscriptions.fields.billingSource")}
+                      </dt>
+                      <dd className="mt-1 font-medium">
+                        {t(`subscriptions.billingSources.${subscription.billingSource}`)}
+                      </dd>
+                    </div>
                   </dl>
                   <SubscriptionActions subscription={subscription} />
                 </CardContent>
@@ -413,6 +427,8 @@ function SubscriptionActions({ subscription }: { subscription: Subscription }) {
 
   return (
     <div className="flex flex-nowrap items-center justify-center gap-1.5">
+      <HowToCancelDialog subscription={subscription} disabled={isPending} />
+
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
