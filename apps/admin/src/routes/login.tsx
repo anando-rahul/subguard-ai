@@ -24,7 +24,12 @@ function LoginPage() {
       { email, password },
       {
         onError: (error) => {
-          const message = error instanceof Error ? error.message : t("auth.login.fallbackError");
+          let message = error instanceof Error ? error.message : t("auth.login.fallbackError");
+
+          if (message.toLowerCase().includes("failed to fetch")) {
+            message = "Unable to connect to the server. Please try again later.";
+          }
+
           toast.error(message);
         },
       },

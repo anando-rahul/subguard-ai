@@ -42,11 +42,18 @@ function LoginPage() {
       { email, password },
       {
         onError: (error) => {
+          let errorMessage =
+            error instanceof Error
+              ? error.message
+              : "Please check your credentials and try again.";
+
+          if (errorMessage.toLowerCase().includes("failed to fetch")) {
+            errorMessage =
+              "Unable to connect to the server. Please check your internet connection or try again later.";
+          }
+
           toast.error("Login failed", {
-            description:
-              error instanceof Error
-                ? error.message
-                : "Please check your credentials and try again.",
+            description: errorMessage,
           });
         },
       },
