@@ -16,6 +16,8 @@ import { Route as AiReviewRouteImport } from './routes/ai-review'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SubscriptionsIndexRouteImport } from './routes/subscriptions/index'
 import { Route as SubscriptionsNewRouteImport } from './routes/subscriptions/new'
+import { Route as AiReviewHistoryRouteImport } from './routes/ai-review_.history'
+import { Route as SubscriptionsSubscriptionIdIndexRouteImport } from './routes/subscriptions/$subscriptionId/index'
 import { Route as SubscriptionsSubscriptionIdEditRouteImport } from './routes/subscriptions/$subscriptionId/edit'
 
 const RegisterRoute = RegisterRouteImport.update({
@@ -53,6 +55,17 @@ const SubscriptionsNewRoute = SubscriptionsNewRouteImport.update({
   path: '/subscriptions/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AiReviewHistoryRoute = AiReviewHistoryRouteImport.update({
+  id: '/ai-review_/history',
+  path: '/ai-review/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionsSubscriptionIdIndexRoute =
+  SubscriptionsSubscriptionIdIndexRouteImport.update({
+    id: '/subscriptions/$subscriptionId/',
+    path: '/subscriptions/$subscriptionId/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const SubscriptionsSubscriptionIdEditRoute =
   SubscriptionsSubscriptionIdEditRouteImport.update({
     id: '/subscriptions/$subscriptionId/edit',
@@ -66,9 +79,11 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/ai-review/history': typeof AiReviewHistoryRoute
   '/subscriptions/new': typeof SubscriptionsNewRoute
   '/subscriptions/': typeof SubscriptionsIndexRoute
   '/subscriptions/$subscriptionId/edit': typeof SubscriptionsSubscriptionIdEditRoute
+  '/subscriptions/$subscriptionId/': typeof SubscriptionsSubscriptionIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -76,9 +91,11 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/ai-review/history': typeof AiReviewHistoryRoute
   '/subscriptions/new': typeof SubscriptionsNewRoute
   '/subscriptions': typeof SubscriptionsIndexRoute
   '/subscriptions/$subscriptionId/edit': typeof SubscriptionsSubscriptionIdEditRoute
+  '/subscriptions/$subscriptionId': typeof SubscriptionsSubscriptionIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -87,9 +104,11 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/ai-review_/history': typeof AiReviewHistoryRoute
   '/subscriptions/new': typeof SubscriptionsNewRoute
   '/subscriptions/': typeof SubscriptionsIndexRoute
   '/subscriptions/$subscriptionId/edit': typeof SubscriptionsSubscriptionIdEditRoute
+  '/subscriptions/$subscriptionId/': typeof SubscriptionsSubscriptionIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -99,9 +118,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/register'
+    | '/ai-review/history'
     | '/subscriptions/new'
     | '/subscriptions/'
     | '/subscriptions/$subscriptionId/edit'
+    | '/subscriptions/$subscriptionId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -109,9 +130,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/register'
+    | '/ai-review/history'
     | '/subscriptions/new'
     | '/subscriptions'
     | '/subscriptions/$subscriptionId/edit'
+    | '/subscriptions/$subscriptionId'
   id:
     | '__root__'
     | '/'
@@ -119,9 +142,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/register'
+    | '/ai-review_/history'
     | '/subscriptions/new'
     | '/subscriptions/'
     | '/subscriptions/$subscriptionId/edit'
+    | '/subscriptions/$subscriptionId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -130,9 +155,11 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  AiReviewHistoryRoute: typeof AiReviewHistoryRoute
   SubscriptionsNewRoute: typeof SubscriptionsNewRoute
   SubscriptionsIndexRoute: typeof SubscriptionsIndexRoute
   SubscriptionsSubscriptionIdEditRoute: typeof SubscriptionsSubscriptionIdEditRoute
+  SubscriptionsSubscriptionIdIndexRoute: typeof SubscriptionsSubscriptionIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -186,6 +213,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubscriptionsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ai-review_/history': {
+      id: '/ai-review_/history'
+      path: '/ai-review/history'
+      fullPath: '/ai-review/history'
+      preLoaderRoute: typeof AiReviewHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscriptions/$subscriptionId/': {
+      id: '/subscriptions/$subscriptionId/'
+      path: '/subscriptions/$subscriptionId'
+      fullPath: '/subscriptions/$subscriptionId/'
+      preLoaderRoute: typeof SubscriptionsSubscriptionIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/subscriptions/$subscriptionId/edit': {
       id: '/subscriptions/$subscriptionId/edit'
       path: '/subscriptions/$subscriptionId/edit'
@@ -202,9 +243,11 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  AiReviewHistoryRoute: AiReviewHistoryRoute,
   SubscriptionsNewRoute: SubscriptionsNewRoute,
   SubscriptionsIndexRoute: SubscriptionsIndexRoute,
   SubscriptionsSubscriptionIdEditRoute: SubscriptionsSubscriptionIdEditRoute,
+  SubscriptionsSubscriptionIdIndexRoute: SubscriptionsSubscriptionIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

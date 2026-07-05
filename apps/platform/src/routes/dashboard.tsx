@@ -21,6 +21,7 @@ import {
   getJakartaDateOnly,
   needsBillingAttention,
 } from "../modules/subscriptions/utils";
+import { Wallet, PiggyBank, Receipt, Activity, Clock, FileWarning, CalendarClock, CreditCard } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: async ({ context }) => {
@@ -103,15 +104,22 @@ function DashboardPage() {
       {subscriptions.isPending ? <Skeleton className="mt-8 h-40 w-full rounded-xl" /> : null}
 
       {isEmpty ? (
-        <Empty className="mt-8 rounded-xl border bg-card py-16">
+        <Empty className="mt-8 rounded-xl border bg-card py-16 shadow-sm">
           <EmptyHeader>
-            <EmptyTitle>{t("dashboard.empty.title")}</EmptyTitle>
-            <EmptyDescription>{t("dashboard.empty.description")}</EmptyDescription>
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <CreditCard className="h-8 w-8 text-primary" />
+            </div>
+            <EmptyTitle className="text-xl font-bold">{t("dashboard.empty.title")}</EmptyTitle>
+            <EmptyDescription className="max-w-md mx-auto">{t("dashboard.empty.description")}</EmptyDescription>
           </EmptyHeader>
-          <Button asChild>
+          <Button asChild size="lg" className="mt-4">
             <Link to="/subscriptions/new">{t("dashboard.actions.addFirst")}</Link>
           </Button>
         </Empty>
+      ) : null}
+
+      {hasSubscriptions && billingAttentionItems.length > 0 ? (
+        <BillingAttentionAlert items={billingAttentionItems} />
       ) : null}
 
       {hasSubscriptions && summary.isPending ? <SummarySkeleton /> : null}
@@ -134,10 +142,6 @@ function DashboardPage() {
       ) : null}
 
       {hasSubscriptions && summary.data ? <SummaryCards summary={summary.data} /> : null}
-
-      {hasSubscriptions && billingAttentionItems.length > 0 ? (
-        <BillingAttentionAlert items={billingAttentionItems} />
-      ) : null}
 
       {hasSubscriptions ? (
         <section className="mt-10" aria-labelledby="upcoming-heading">
@@ -193,7 +197,7 @@ function DashboardPage() {
           ) : null}
 
           {upcoming.data && upcoming.data.items.length > 0 ? (
-            <div className="mt-5 overflow-hidden rounded-xl border bg-card">
+            <div className="mt-5 overflow-hidden rounded-xl border bg-card shadow-sm divide-y">
               {upcoming.data.items.slice(0, 6).map((item, index) => (
                 <UpcomingRow
                   key={item.id}
@@ -217,27 +221,39 @@ function SummaryCards({ summary }: { summary: DashboardSummary }) {
       label: t("dashboard.summary.monthlySpend"),
       value: formatIdr(summary.estimatedMonthlySpend, locale),
       featured: true,
+      icon: Wallet,
+      colorClass: "text-primary",
+      bgClass: "bg-primary/10",
+      cardClass: "border-primary/20 bg-primary/5 shadow-sm"
     },
     {
       label: t("dashboard.summary.monthlySaving"),
       value: formatIdr(summary.estimatedMonthlySaving, locale),
       featured: true,
+      icon: PiggyBank,
+      colorClass: "text-emerald-500",
+      bgClass: "bg-emerald-500/10",
+      cardClass: "border-emerald-500/20 bg-emerald-500/5 shadow-sm"
     },
     {
       label: t("dashboard.summary.yearlySpend"),
       value: formatIdr(summary.estimatedYearlySpend, locale),
+      icon: Receipt,
     },
     {
       label: t("dashboard.summary.activeCount"),
       value: summary.activeSubscriptionCount.toLocaleString(locale),
+      icon: Activity,
     },
     {
       label: t("dashboard.summary.trialCount"),
       value: summary.trialSubscriptionCount.toLocaleString(locale),
+      icon: Clock,
     },
     {
       label: t("dashboard.summary.candidateCount"),
       value: summary.cancellationCandidateCount.toLocaleString(locale),
+      icon: FileWarning,
     },
   ];
 
@@ -247,26 +263,32 @@ function SummaryCards({ summary }: { summary: DashboardSummary }) {
         {t("dashboard.summary.title")}
       </h2>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {metrics.map((metric) => (
-          <Card key={metric.label} className={metric.featured ? "xl:col-span-2" : undefined}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {metric.label}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p
-                className={
-                  metric.featured
-                    ? "text-3xl font-semibold tracking-tight"
-                    : "text-2xl font-semibold"
-                }
-              >
-                {metric.value}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+        {metrics.map((metric) => {
+          const Icon = metric.icon;
+          return (
+            <Card key={metric.label} className={`${metric.featured ? "xl:col-span-2" : ""} ${metric.cardClass || ""}`}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {metric.label}
+                </CardTitle>
+                <div className={`rounded-full p-2 ${metric.bgClass || 'bg-muted/50'}`}>
+                  <Icon className={`h-4 w-4 ${metric.colorClass || 'text-muted-foreground'}`} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p
+                  className={
+                    metric.featured
+                      ? "text-3xl font-bold tracking-tight"
+                      : "text-2xl font-bold"
+                  }
+                >
+                  {metric.value}
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </section>
   );
@@ -278,15 +300,15 @@ function BillingAttentionAlert({ items }: { items: Array<{ name: string }> }) {
   return (
     <Alert
       aria-live="polite"
-      className="mt-8 border-amber-500/70 bg-amber-50 px-5 py-5 text-amber-950 shadow-sm ring-1 ring-amber-500/20 dark:border-amber-400/60 dark:bg-amber-950/40 dark:text-amber-100"
+      className="mt-8 border-destructive bg-destructive/5 px-6 py-5 text-destructive shadow-sm"
     >
-      <Badge className="col-start-2 mb-2 w-fit bg-amber-600 text-white hover:bg-amber-600 dark:bg-amber-400 dark:text-amber-950">
+      <Badge className="col-start-2 mb-2 w-fit bg-destructive text-destructive-foreground hover:bg-destructive/90">
         {t("dashboard.reminder.badge", { count: items.length })}
       </Badge>
-      <AlertTitle className="line-clamp-none text-lg font-semibold">
+      <AlertTitle className="line-clamp-none text-lg font-bold">
         {t("dashboard.reminder.title", { count: items.length })}
       </AlertTitle>
-      <AlertDescription className="mt-1 gap-4 text-amber-900 dark:text-amber-100">
+      <AlertDescription className="mt-2 gap-4 text-destructive/90">
         <p>
           {t("dashboard.reminder.description", {
             count: items.length,
@@ -299,7 +321,8 @@ function BillingAttentionAlert({ items }: { items: Array<{ name: string }> }) {
         <Button
           asChild
           size="sm"
-          className="bg-amber-700 text-white hover:bg-amber-800 dark:bg-amber-300 dark:text-amber-950 dark:hover:bg-amber-200"
+          variant="destructive"
+          className="mt-3 font-medium"
         >
           <Link to="/subscriptions" search={{ sort: "nextBillingDateAsc" }}>
             {t("dashboard.actions.reviewBillingDates")}
@@ -322,22 +345,30 @@ function UpcomingRow({ item, isLast }: { item: UpcomingBillingItem; isLast: bool
 
   return (
     <div
-      className={`flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between ${isLast ? "" : "border-b"}`}
+      className={`flex flex-col gap-4 p-5 hover:bg-muted/30 transition-colors sm:flex-row sm:items-center sm:justify-between`}
     >
-      <div>
-        <div className="flex flex-wrap items-center gap-2">
-          <h3 className="font-medium">{item.name}</h3>
-          {item.isDueSoon ? <Badge variant="secondary">{dueLabel}</Badge> : null}
+      <div className="flex items-center gap-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
+          <CalendarClock className="h-5 w-5 text-muted-foreground" />
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {formatDateOnly(item.nextBillingDate, locale)}
-        </p>
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-semibold">{item.name}</h3>
+            {item.isDueSoon ? <Badge variant="destructive" className="h-5 px-1.5 text-[10px] uppercase">{dueLabel}</Badge> : null}
+          </div>
+          <p className="mt-0.5 text-sm font-medium text-muted-foreground">
+            {formatDateOnly(item.nextBillingDate, locale)}
+          </p>
+        </div>
       </div>
-      <div className="sm:text-right">
-        <p className="font-medium">{formatIdr(item.price, locale)}</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {t(`subscriptions.billingCycles.${item.billingCycle}`)}
-        </p>
+      <div className="sm:text-right flex items-center justify-between sm:block border-t sm:border-0 pt-3 sm:pt-0 mt-2 sm:mt-0">
+        <p className="text-sm font-medium text-muted-foreground sm:hidden">{t(`subscriptions.billingCycles.${item.billingCycle}`)}</p>
+        <div>
+          <p className="font-bold text-lg">{formatIdr(item.price, locale)}</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider hidden sm:block">
+            {t(`subscriptions.billingCycles.${item.billingCycle}`)}
+          </p>
+        </div>
       </div>
     </div>
   );

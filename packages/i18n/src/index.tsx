@@ -39,9 +39,10 @@ export function createFrontendI18n({
     .use(initReactI18next)
     .init({
       resources,
+      lng: "en",
       defaultNS: defaultNamespace,
-      fallbackLng: fallbackLanguage,
-      supportedLngs: [...supportedLanguages],
+      fallbackLng: "en",
+      supportedLngs: ["en"],
       interpolation: {
         escapeValue: false,
       },
