@@ -51,9 +51,16 @@ function RegisterPage() {
       { email, password, name: email },
       {
         onError: (error) => {
+          let errorMessage =
+            error instanceof Error ? error.message : "An error occurred during registration.";
+
+          if (errorMessage.toLowerCase().includes("failed to fetch")) {
+            errorMessage =
+              "Unable to connect to the server. Please check your internet connection or try again later.";
+          }
+
           toast.error("Registration failed", {
-            description:
-              error instanceof Error ? error.message : "An error occurred during registration.",
+            description: errorMessage,
           });
         },
       },
