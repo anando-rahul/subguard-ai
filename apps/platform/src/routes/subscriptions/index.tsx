@@ -15,6 +15,14 @@ import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import { Card, CardContent } from "@repo/ui/components/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@repo/ui/components/empty";
+import {
+  BookmarkCheckIcon,
+  BookmarkIcon,
+  CircleXIcon,
+  PencilIcon,
+  RefreshCwIcon,
+  Trash2Icon,
+} from "@repo/ui/components/icons";
 import { NativeSelect, NativeSelectOption } from "@repo/ui/components/native-select";
 import { Skeleton } from "@repo/ui/components/skeleton";
 import { toast } from "@repo/ui/components/sonner";
@@ -26,15 +34,23 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui/components/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@repo/ui/components/tooltip";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
+import { HowToCancelDialog } from "../../components/subscriptions/how-to-cancel-dialog";
 import { meQueryOptions } from "../../modules/auth/hooks/use-auth";
 import { UnauthorizedError } from "../../modules/auth/services";
 import {
   subscriptionsQueryOptions,
+  useCancelSubscriptionMutation,
   useCandidateMutation,
   useDeleteSubscriptionMutation,
-  useStatusMutation,
+  useRenewSubscriptionMutation,
 } from "../../modules/subscriptions/hooks/use-subscriptions";
 import {
   subscriptionCategories,
@@ -222,31 +238,49 @@ function SubscriptionsPage() {
       ) : null}
 
       {subscriptions.data && subscriptions.data.items.length > 0 ? (
-        <>
-          <div className="mt-8 hidden overflow-hidden rounded-xl border bg-card lg:block">
-            <Table>
+        <TooltipProvider delayDuration={250}>
+          <div className="mt-8 hidden overflow-x-auto rounded-xl border bg-card lg:block">
+            <Table className="min-w-[1480px] table-fixed">
+              <colgroup>
+                <col className="w-[220px]" />
+                <col className="w-[160px]" />
+                <col className="w-[180px]" />
+                <col className="w-[170px]" />
+                <col className="w-[200px]" />
+                <col className="w-[130px]" />
+                <col className="w-[160px]" />
+                <col className="w-[260px]" />
+              </colgroup>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t("subscriptions.fields.name")}</TableHead>
-                  <TableHead>{t("subscriptions.fields.price")}</TableHead>
-                  <TableHead>{t("subscriptions.fields.nextBillingDate")}</TableHead>
-                  <TableHead>{t("subscriptions.fields.status")}</TableHead>
-                  <TableHead>{t("subscriptions.fields.usageFrequency")}</TableHead>
-                  <TableHead className="text-right">{t("subscriptions.fields.actions")}</TableHead>
+                  <TableHead className="px-4">{t("subscriptions.fields.name")}</TableHead>
+                  <TableHead className="px-4">{t("subscriptions.fields.price")}</TableHead>
+                  <TableHead className="px-4">
+                    {t("subscriptions.fields.nextBillingDate")}
+                  </TableHead>
+                  <TableHead className="px-4">{t("subscriptions.fields.paymentMethod")}</TableHead>
+                  <TableHead className="px-4">{t("subscriptions.fields.billingSource")}</TableHead>
+                  <TableHead className="px-4">{t("subscriptions.fields.status")}</TableHead>
+                  <TableHead className="px-4">{t("subscriptions.fields.usageFrequency")}</TableHead>
+                  <TableHead className="px-4 text-center">
+                    {t("subscriptions.fields.actions")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {subscriptions.data.items.map((subscription) => (
-                  <TableRow key={subscription.id}>
-                    <TableCell>
-                      <div className="grid gap-1">
-                        <span className="font-medium">{subscription.name}</span>
+                  <TableRow key={subscription.id} data-subscription-id={subscription.id}>
+                    <TableCell className="px-4 py-4 align-top">
+                      <div className="grid min-w-0 gap-1">
+                        <span className="truncate font-medium" title={subscription.name}>
+                          {subscription.name}
+                        </span>
                         <span className="text-xs text-muted-foreground">
                           {t(`subscriptions.categories.${subscription.category}`)}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="px-4 py-4 align-top">
                       <div className="grid gap-1">
                         <span>{formatIdr(subscription.price, i18n.resolvedLanguage ?? "en")}</span>
                         <span className="text-xs text-muted-foreground">
@@ -254,17 +288,32 @@ function SubscriptionsPage() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="px-4 py-4 align-top">
                       <BillingDate subscription={subscription} />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="px-4 py-4 align-top">
+                      <span
+                        className="block truncate"
+                        title={
+                          subscription.paymentMethod ??
+                          t("subscriptions.list.paymentMethodFallback")
+                        }
+                      >
+                        {subscription.paymentMethod ??
+                          t("subscriptions.list.paymentMethodFallback")}
+                      </span>
+                    </TableCell>
+                    <TableCell className="px-4 py-4 align-top">
+                      {t(`subscriptions.billingSources.${subscription.billingSource}`)}
+                    </TableCell>
+                    <TableCell className="px-4 py-4 align-top">
                       <StatusBadge status={subscription.status} />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="px-4 py-4 align-top">
                       {t(`subscriptions.usageFrequencies.${subscription.usageFrequency}`)}
                     </TableCell>
-                    <TableCell>
-                      <SubscriptionActions subscription={subscription} compact />
+                    <TableCell className="px-4 py-4 align-top text-center">
+                      <SubscriptionActions subscription={subscription} />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -300,13 +349,38 @@ function SubscriptionsPage() {
                         <BillingDate subscription={subscription} />
                       </dd>
                     </div>
+                    <div>
+                      <dt className="text-muted-foreground">
+                        {t("subscriptions.fields.paymentMethod")}
+                      </dt>
+                      <dd className="mt-1 font-medium">
+                        {subscription.paymentMethod ??
+                          t("subscriptions.list.paymentMethodFallback")}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">
+                        {t("subscriptions.fields.usageFrequency")}
+                      </dt>
+                      <dd className="mt-1 font-medium">
+                        {t(`subscriptions.usageFrequencies.${subscription.usageFrequency}`)}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">
+                        {t("subscriptions.fields.billingSource")}
+                      </dt>
+                      <dd className="mt-1 font-medium">
+                        {t(`subscriptions.billingSources.${subscription.billingSource}`)}
+                      </dd>
+                    </div>
                   </dl>
                   <SubscriptionActions subscription={subscription} />
                 </CardContent>
               </Card>
             ))}
           </div>
-        </>
+        </TooltipProvider>
       ) : null}
     </section>
   );
@@ -335,120 +409,193 @@ function BillingDate({ subscription }: { subscription: Subscription }) {
   );
 }
 
-function SubscriptionActions({
-  compact = false,
-  subscription,
-}: {
-  compact?: boolean;
-  subscription: Subscription;
-}) {
+function SubscriptionActions({ subscription }: { subscription: Subscription }) {
   const { t } = useTranslation();
+  const cancelMutation = useCancelSubscriptionMutation();
   const candidateMutation = useCandidateMutation();
-  const statusMutation = useStatusMutation();
+  const renewMutation = useRenewSubscriptionMutation();
   const deleteMutation = useDeleteSubscriptionMutation();
   const isPending =
-    candidateMutation.isPending || statusMutation.isPending || deleteMutation.isPending;
+    cancelMutation.isPending ||
+    candidateMutation.isPending ||
+    renewMutation.isPending ||
+    deleteMutation.isPending;
 
   function showError(error: unknown) {
     toast.error(error instanceof Error ? error.message : t("subscriptions.toast.mutationError"));
   }
 
   return (
-    <div className={compact ? "flex items-center justify-end gap-2" : "grid gap-3"}>
-      <NativeSelect
-        aria-label={t("subscriptions.actions.changeStatus", { name: subscription.name })}
-        className={compact ? "w-40" : "w-full"}
-        size="sm"
-        disabled={isPending}
-        value={subscription.status}
-        onChange={(event) =>
-          statusMutation.mutate(
-            { id: subscription.id, status: event.target.value as SubscriptionStatus },
-            {
-              onError: showError,
-              onSuccess: () => toast.success(t("subscriptions.toast.statusUpdated")),
-            },
-          )
-        }
-      >
-        {subscriptionStatuses.map((status) => (
-          <NativeSelectOption key={status} value={status}>
-            {t(`subscriptions.statuses.${status}`)}
-          </NativeSelectOption>
-        ))}
-      </NativeSelect>
+    <div className="flex flex-nowrap items-center justify-center gap-1.5">
+      <HowToCancelDialog subscription={subscription} disabled={isPending} />
 
-      <Button
-        type="button"
-        size="sm"
-        variant={subscription.isCancellationCandidate ? "secondary" : "outline"}
-        disabled={isPending || subscription.status === "CANCELLED"}
-        onClick={() =>
-          candidateMutation.mutate(
-            {
-              id: subscription.id,
-              isCancellationCandidate: !subscription.isCancellationCandidate,
-            },
-            {
-              onError: showError,
-              onSuccess: () => toast.success(t("subscriptions.toast.candidateUpdated")),
-            },
-          )
-        }
-      >
-        {t(
-          subscription.isCancellationCandidate
-            ? "subscriptions.actions.unmarkCandidate"
-            : "subscriptions.actions.markCandidate",
-        )}
-      </Button>
-
-      <div className="flex gap-2">
-        <Button asChild size="sm" variant="outline" className={compact ? undefined : "flex-1"}>
-          <Link
-            to="/subscriptions/$subscriptionId/edit"
-            params={{ subscriptionId: subscription.id }}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            type="button"
+            size="icon-sm"
+            aria-label={t("subscriptions.actions.renewLabel", { name: subscription.name })}
+            disabled={isPending}
+            onClick={() =>
+              renewMutation.mutate(subscription.id, {
+                onError: showError,
+                onSuccess: () => toast.success(t("subscriptions.toast.renewed")),
+              })
+            }
           >
-            {t("subscriptions.actions.edit")}
-          </Link>
-        </Button>
+            <RefreshCwIcon aria-hidden="true" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="top" sideOffset={6}>
+          {t("subscriptions.actions.renewSubscription")}
+        </TooltipContent>
+      </Tooltip>
 
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              type="button"
-              size="sm"
-              variant="destructive"
-              className={compact ? undefined : "flex-1"}
-              disabled={isPending}
-            >
-              {t("subscriptions.actions.delete")}
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t("subscriptions.delete.title")}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t("subscriptions.delete.description", { name: subscription.name })}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t("subscriptions.actions.cancel")}</AlertDialogCancel>
-              <AlertDialogAction
+      <AlertDialog>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <AlertDialogTrigger asChild>
+              <Button
+                type="button"
+                size="icon-sm"
                 variant="destructive"
-                onClick={() =>
-                  deleteMutation.mutate(subscription.id, {
-                    onError: showError,
-                    onSuccess: () => toast.success(t("subscriptions.toast.deleted")),
-                  })
-                }
+                aria-label={t("subscriptions.actions.cancelLabel", { name: subscription.name })}
+                disabled={isPending || subscription.status === "CANCELLED"}
               >
-                {t("subscriptions.actions.confirmDelete")}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+                <CircleXIcon aria-hidden="true" />
+              </Button>
+            </AlertDialogTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="top" sideOffset={6}>
+            {t("subscriptions.actions.cancelSubscription")}
+          </TooltipContent>
+        </Tooltip>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("subscriptions.cancel.title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("subscriptions.cancel.description", { name: subscription.name })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("subscriptions.actions.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() =>
+                cancelMutation.mutate(subscription.id, {
+                  onError: showError,
+                  onSuccess: () => toast.success(t("subscriptions.toast.cancelled")),
+                })
+              }
+            >
+              {t("subscriptions.actions.confirmCancellation")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            type="button"
+            size="icon-sm"
+            variant={subscription.isCancellationCandidate ? "secondary" : "outline"}
+            aria-label={t(
+              subscription.isCancellationCandidate
+                ? "subscriptions.actions.unmarkCandidateLabel"
+                : "subscriptions.actions.markCandidateLabel",
+              { name: subscription.name },
+            )}
+            disabled={isPending || subscription.status === "CANCELLED"}
+            onClick={() =>
+              candidateMutation.mutate(
+                {
+                  id: subscription.id,
+                  isCancellationCandidate: !subscription.isCancellationCandidate,
+                },
+                {
+                  onError: showError,
+                  onSuccess: () => toast.success(t("subscriptions.toast.candidateUpdated")),
+                },
+              )
+            }
+          >
+            {subscription.isCancellationCandidate ? (
+              <BookmarkCheckIcon aria-hidden="true" />
+            ) : (
+              <BookmarkIcon aria-hidden="true" />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="top" sideOffset={6}>
+          {t(
+            subscription.isCancellationCandidate
+              ? "subscriptions.actions.unmarkCandidate"
+              : "subscriptions.actions.markCandidate",
+          )}
+        </TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button asChild size="icon-sm" variant="outline">
+            <Link
+              to="/subscriptions/$subscriptionId/edit"
+              params={{ subscriptionId: subscription.id }}
+              aria-label={t("subscriptions.actions.editLabel", { name: subscription.name })}
+            >
+              <PencilIcon aria-hidden="true" />
+            </Link>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="top" sideOffset={6}>
+          {t("subscriptions.actions.edit")}
+        </TooltipContent>
+      </Tooltip>
+
+      <AlertDialog>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <AlertDialogTrigger asChild>
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="ghost"
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/20"
+                aria-label={t("subscriptions.actions.deleteLabel", { name: subscription.name })}
+                disabled={isPending}
+              >
+                <Trash2Icon aria-hidden="true" />
+              </Button>
+            </AlertDialogTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="top" sideOffset={6}>
+            {t("subscriptions.actions.delete")}
+          </TooltipContent>
+        </Tooltip>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("subscriptions.delete.title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("subscriptions.delete.description", { name: subscription.name })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("subscriptions.actions.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() =>
+                deleteMutation.mutate(subscription.id, {
+                  onError: showError,
+                  onSuccess: () => toast.success(t("subscriptions.toast.deleted")),
+                })
+              }
+            >
+              {t("subscriptions.actions.confirmDelete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

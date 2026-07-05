@@ -1,10 +1,13 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  cancelSubscription,
   createSubscription,
   deleteSubscription,
   getSubscription,
   listSubscriptions,
+  renewSubscription,
   updateSubscription,
+  updateSubscriptionBillingSource,
   updateSubscriptionCandidate,
   updateSubscriptionStatus,
 } from "../services";
@@ -54,6 +57,10 @@ export function useUpdateSubscriptionMutation() {
   return useProductMutation(updateSubscription);
 }
 
+export function useBillingSourceMutation() {
+  return useProductMutation(updateSubscriptionBillingSource);
+}
+
 export function useDeleteSubscriptionMutation() {
   return useProductMutation(deleteSubscription);
 }
@@ -64,4 +71,12 @@ export function useCandidateMutation() {
 
 export function useStatusMutation() {
   return useProductMutation(updateSubscriptionStatus);
+}
+
+export function useRenewSubscriptionMutation() {
+  return useProductMutation(renewSubscription);
+}
+
+export function useCancelSubscriptionMutation() {
+  return useProductMutation(cancelSubscription);
 }

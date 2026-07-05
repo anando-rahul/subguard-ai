@@ -15,7 +15,12 @@ import {
 } from "../modules/dashboard/hooks/use-dashboard";
 import type { DashboardSummary, UpcomingBillingItem } from "../modules/dashboard/types";
 import { subscriptionsQueryOptions } from "../modules/subscriptions/hooks/use-subscriptions";
-import { formatDateOnly, formatIdr } from "../modules/subscriptions/utils";
+import {
+  formatDateOnly,
+  formatIdr,
+  getJakartaDateOnly,
+  needsBillingAttention,
+} from "../modules/subscriptions/utils";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: async ({ context }) => {
@@ -62,7 +67,9 @@ function DashboardPage() {
   const identity = user.data.name || user.data.email;
   const isEmpty = subscriptions.data?.items.length === 0;
   const hasSubscriptions = Boolean(subscriptions.data?.items.length);
-  const dueSoon = upcoming.data?.items.filter((item) => item.isDueSoon) ?? [];
+  const today = getJakartaDateOnly();
+  const billingAttentionItems =
+    subscriptions.data?.items.filter((item) => needsBillingAttention(item, today)) ?? [];
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
@@ -128,7 +135,9 @@ function DashboardPage() {
 
       {hasSubscriptions && summary.data ? <SummaryCards summary={summary.data} /> : null}
 
-      {hasSubscriptions && dueSoon.length > 0 ? <DueSoonAlert items={dueSoon} /> : null}
+      {hasSubscriptions && billingAttentionItems.length > 0 ? (
+        <BillingAttentionAlert items={billingAttentionItems} />
+      ) : null}
 
       {hasSubscriptions ? (
         <section className="mt-10" aria-labelledby="upcoming-heading">
@@ -263,20 +272,39 @@ function SummaryCards({ summary }: { summary: DashboardSummary }) {
   );
 }
 
-function DueSoonAlert({ items }: { items: UpcomingBillingItem[] }) {
+function BillingAttentionAlert({ items }: { items: Array<{ name: string }> }) {
   const { t } = useTranslation();
 
   return (
-    <Alert className="mt-8 border-primary/30 bg-primary/5">
-      <AlertTitle>{t("dashboard.reminder.title", { count: items.length })}</AlertTitle>
-      <AlertDescription>
-        {t("dashboard.reminder.description", {
-          count: items.length,
-          names: items
-            .slice(0, 3)
-            .map((item) => item.name)
-            .join(", "),
-        })}
+    <Alert
+      aria-live="polite"
+      className="mt-8 border-amber-500/70 bg-amber-50 px-5 py-5 text-amber-950 shadow-sm ring-1 ring-amber-500/20 dark:border-amber-400/60 dark:bg-amber-950/40 dark:text-amber-100"
+    >
+      <Badge className="col-start-2 mb-2 w-fit bg-amber-600 text-white hover:bg-amber-600 dark:bg-amber-400 dark:text-amber-950">
+        {t("dashboard.reminder.badge", { count: items.length })}
+      </Badge>
+      <AlertTitle className="line-clamp-none text-lg font-semibold">
+        {t("dashboard.reminder.title", { count: items.length })}
+      </AlertTitle>
+      <AlertDescription className="mt-1 gap-4 text-amber-900 dark:text-amber-100">
+        <p>
+          {t("dashboard.reminder.description", {
+            count: items.length,
+            names: items
+              .slice(0, 3)
+              .map((item) => item.name)
+              .join(", "),
+          })}
+        </p>
+        <Button
+          asChild
+          size="sm"
+          className="bg-amber-700 text-white hover:bg-amber-800 dark:bg-amber-300 dark:text-amber-950 dark:hover:bg-amber-200"
+        >
+          <Link to="/subscriptions" search={{ sort: "nextBillingDateAsc" }}>
+            {t("dashboard.actions.reviewBillingDates")}
+          </Link>
+        </Button>
       </AlertDescription>
     </Alert>
   );

@@ -1,5 +1,6 @@
 import { apiClient } from "../../lib/api";
 import type {
+  BillingSource,
   Subscription,
   SubscriptionFilters,
   SubscriptionInput,
@@ -56,6 +57,22 @@ export async function updateSubscription({ id, input }: { id: string; input: Sub
   return (await response.json()) as Subscription;
 }
 
+export async function updateSubscriptionBillingSource({
+  billingSource,
+  id,
+}: {
+  billingSource: BillingSource;
+  id: string;
+}) {
+  const response = await apiClient.subscriptions[":id"].$patch({
+    json: { billingSource },
+    param: { id },
+  });
+  await assertOk(response, "Failed to update billing source.");
+
+  return (await response.json()) as Subscription;
+}
+
 export async function deleteSubscription(id: string) {
   const response = await apiClient.subscriptions[":id"].$delete({ param: { id } });
   await assertOk(response, "Failed to delete subscription.");
@@ -89,6 +106,20 @@ export async function updateSubscriptionStatus({
     param: { id },
   });
   await assertOk(response, "Failed to update subscription status.");
+
+  return (await response.json()) as Subscription;
+}
+
+export async function renewSubscription(id: string) {
+  const response = await apiClient.subscriptions[":id"].renew.$patch({ param: { id } });
+  await assertOk(response, "Failed to renew subscription.");
+
+  return (await response.json()) as Subscription;
+}
+
+export async function cancelSubscription(id: string) {
+  const response = await apiClient.subscriptions[":id"].cancel.$patch({ param: { id } });
+  await assertOk(response, "Failed to cancel subscription.");
 
   return (await response.json()) as Subscription;
 }
