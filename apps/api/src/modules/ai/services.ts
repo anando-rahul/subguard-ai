@@ -97,6 +97,9 @@ export async function reviewSubscriptions(userId: string) {
         null,
         2
       )}\n\nProvide an \`overallSummary\` and a list of \`recommendations\` according to the schema. For each recommendation, include \`subscriptionId\`, \`name\`, \`urgency\` level ("LOW", "MEDIUM", "HIGH"), \`reason\` (based on usage frequency/cost), and \`suggestedAction\` (including specific steps on how to cancel based on the \`billingSource\`). YOU MUST OUTPUT VALID JSON.`,
+      temperature: Number(process.env.OPENROUTER_TEMPERATURE || 0.7),
+      maxTokens: Number(process.env.OPENROUTER_MAX_TOKENS || 1000),
+      abortSignal: AbortSignal.timeout(Number(process.env.OPENROUTER_TIMEOUT_MS || 60000)),
     });
 
     // Save history to AIReviewLog
