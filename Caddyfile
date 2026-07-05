@@ -1,0 +1,11 @@
+subguardai.web.id, http://116.193.191.104 {
+    reverse_proxy platform:3000
+}
+
+admin.subguardai.web.id {
+    reverse_proxy admin:4000
+}
+
+api.subguardai.web.id {
+    reverse_proxy api:8000
+}

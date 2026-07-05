@@ -126,6 +126,24 @@ services:
         condition: service_healthy
     command: pnpm --filter @repo/worker start
 
+  caddy:
+    image: caddy:2-alpine
+    container_name: subguard-ai-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - platform
+      - admin
+      - api
+
 volumes:
   postgres_data:
   redis_data:
+  caddy_data:
+  caddy_config:
