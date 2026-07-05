@@ -222,18 +222,18 @@ function SummaryCards({ summary }: { summary: DashboardSummary }) {
       value: formatIdr(summary.estimatedMonthlySpend, locale),
       featured: true,
       icon: Wallet,
-      colorClass: "text-primary",
-      bgClass: "bg-primary/10",
-      cardClass: "border-primary/20 bg-primary/5 shadow-sm"
+      colorClass: "text-blue-600 dark:text-blue-400",
+      bgClass: "bg-blue-100 dark:bg-blue-900/30",
+      cardClass: "border-blue-200 bg-blue-50/50 dark:border-blue-900/50 dark:bg-blue-950/20 shadow-sm"
     },
     {
       label: t("dashboard.summary.monthlySaving"),
       value: formatIdr(summary.estimatedMonthlySaving, locale),
       featured: true,
       icon: PiggyBank,
-      colorClass: "text-emerald-500",
-      bgClass: "bg-emerald-500/10",
-      cardClass: "border-emerald-500/20 bg-emerald-500/5 shadow-sm"
+      colorClass: "text-blue-600 dark:text-blue-400",
+      bgClass: "bg-blue-100 dark:bg-blue-900/30",
+      cardClass: "border-blue-200 bg-blue-50/50 dark:border-blue-900/50 dark:bg-blue-950/20 shadow-sm"
     },
     {
       label: t("dashboard.summary.yearlySpend"),
@@ -300,15 +300,15 @@ function BillingAttentionAlert({ items }: { items: Array<{ name: string }> }) {
   return (
     <Alert
       aria-live="polite"
-      className="mt-8 border-destructive bg-destructive/5 px-6 py-5 text-destructive shadow-sm"
+      className="mt-8 border-amber-300 bg-amber-50 px-6 py-5 shadow-sm"
     >
-      <Badge className="col-start-2 mb-2 w-fit bg-destructive text-destructive-foreground hover:bg-destructive/90">
+      <Badge className="col-start-2 mb-2 w-fit border-none bg-orange-600 px-2.5 py-0.5 text-xs text-white hover:bg-orange-600/90">
         {t("dashboard.reminder.badge", { count: items.length })}
       </Badge>
-      <AlertTitle className="line-clamp-none text-lg font-bold">
+      <AlertTitle className="line-clamp-none text-lg font-bold text-amber-950">
         {t("dashboard.reminder.title", { count: items.length })}
       </AlertTitle>
-      <AlertDescription className="mt-2 gap-4 text-destructive/90">
+      <AlertDescription className="mt-2 gap-4 text-amber-800">
         <p>
           {t("dashboard.reminder.description", {
             count: items.length,
@@ -321,8 +321,7 @@ function BillingAttentionAlert({ items }: { items: Array<{ name: string }> }) {
         <Button
           asChild
           size="sm"
-          variant="destructive"
-          className="mt-3 font-medium"
+          className="mt-3 font-medium bg-orange-700 text-white hover:bg-orange-800"
         >
           <Link to="/subscriptions" search={{ sort: "nextBillingDateAsc" }}>
             {t("dashboard.actions.reviewBillingDates")}
